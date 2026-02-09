@@ -3,13 +3,69 @@
 ## Overview
 The gd-chatbot is a WordPress plugin that provides an intelligent chatbot interface powered by Claude AI. It is based on version 1.7.1 of gd-claude-chatbot, adapted for general use while maintaining the original functionality.
 
-## Directory Structure
-- **plugin-installs/**: WordPress installation .zip files (includes all historical versions from gd-claude-chatbot)
-- **gd-chatbot/**: Main plugin source code
-  - **admin/**: WordPress admin interface
-  - **includes/**: Core PHP classes
-  - **public/**: Frontend interface (CSS, JS, templates)
-  - **context/**: Domain-specific knowledge files
+## Project Structure (Reorganized February 2026)
+
+```
+gd-chatbot/                    # Project root
+│
+├── CLAUDE.md                  # This file - project context
+├── .gitignore                 # Git configuration
+│
+├── plugin/                    # THE DEPLOYABLE WORDPRESS PLUGIN
+│   ├── gd-chatbot.php         # Main plugin file
+│   ├── uninstall.php          # Cleanup script
+│   ├── readme.txt             # WordPress.org readme
+│   ├── README.md              # Plugin documentation
+│   ├── CHANGELOG.md           # Version history
+│   │
+│   ├── admin/                 # Admin interface
+│   │   ├── class-admin-settings.php
+│   │   ├── css/admin-styles.css
+│   │   └── js/admin-scripts.js
+│   │
+│   ├── includes/              # Core PHP classes
+│   │   ├── class-chat-handler.php
+│   │   ├── class-claude-api.php
+│   │   ├── class-tavily-api.php
+│   │   ├── class-pinecone-api.php
+│   │   ├── class-setlist-search.php
+│   │   ├── class-kb-integration.php
+│   │   └── class-aipower-integration.php
+│   │
+│   ├── public/                # Frontend assets
+│   │   ├── class-chatbot-public.php
+│   │   ├── css/
+│   │   │   ├── chatbot-styles.css
+│   │   │   ├── gd-theme.css
+│   │   │   └── professional-theme.css
+│   │   └── js/chatbot.js
+│   │
+│   └── context/               # Knowledge base (deployed with plugin)
+│       ├── grateful-dead-context.md
+│       ├── grateful_dead_disambiguation_guide.md
+│       ├── grateful_dead_songs.csv
+│       ├── ... (other context files)
+│       └── Deadshows/deadshows/  # Setlist CSVs (1965-1995)
+│
+├── docs/                      # ALL DOCUMENTATION (consolidated)
+│   ├── guides/                # User and developer guides
+│   ├── release-notes/         # Version release notes
+│   ├── implementation/        # Technical implementation docs
+│   └── development/           # Cursor chats, dev notes
+│
+├── releases/                  # PLUGIN PACKAGES (ZIP files)
+│   ├── gd-chatbot-2.0.7.zip
+│   ├── gd-chatbot-2.0.6.zip
+│   └── ... (historical releases)
+│
+├── archive/                   # LEGACY CODE (reference only)
+│   ├── README.md              # Archive explanation
+│   └── gd-claude-chatbot/     # Original plugin, frozen
+│
+└── scripts/                   # BUILD/DEPLOYMENT SCRIPTS
+    ├── build-release.sh       # Creates versioned ZIP packages
+    └── cleanup-for-release.sh # Legacy cleanup script
+```
 
 ## Key Features
 - Claude API integration for conversational AI (Anthropic)
@@ -22,9 +78,9 @@ The gd-chatbot is a WordPress plugin that provides an intelligent chatbot interf
 - Streaming response support
 
 ## Version Information
-- **Current Version**: 1.7.1
+- **Current Version**: 2.0.x (check plugin/gd-chatbot.php for exact version)
 - **Based On**: gd-claude-chatbot v1.7.1 (last stable version)
-- **Release Date**: 2026-01-10
+- **Project Reorganization**: February 2026
 
 ## Technical Architecture
 
@@ -72,6 +128,23 @@ The plugin includes comprehensive Grateful Dead context files:
 
 These files can be replaced or supplemented for other domains.
 
+## Building Releases
+
+To create a new plugin release:
+
+```bash
+cd scripts
+./build-release.sh 2.0.8    # Specify version
+# or
+./build-release.sh          # Auto-detect version from plugin header
+```
+
+The script will:
+1. Create a clean build in a temporary directory
+2. Copy only essential files (excludes dev files)
+3. Create a versioned ZIP in `releases/`
+4. Report file size and contents
+
 ## Development Notes
 
 ### Changes from gd-claude-chatbot
@@ -81,28 +154,15 @@ These files can be replaced or supplemented for other domains.
 - Main class renamed from `GD_Claude_Chatbot` to `GD_Chatbot`
 - All function references updated accordingly
 
-### Preserved Elements
-- All PHP class files from v1.7.1
-- All CSS and JavaScript assets
-- Complete context file collection (enhanced with current versions where 1.7.1 didn't have them)
-- All historical .zip installation files
-- Core functionality and API integrations
-- Database schema and option names
+### File References
+All PHP code uses `GD_CHATBOT_PLUGIN_DIR` and `GD_CHATBOT_PLUGIN_URL` constants, defined in the main plugin file relative to `__FILE__`. This means:
+- The `plugin/` directory structure must be preserved when deploying
+- Paths automatically resolve when the plugin is installed in WordPress
 
-### File Path Structure
-```
-gd-chatbot/
-├── gd-chatbot/              # Main plugin directory
-│   ├── gd-chatbot.php       # Main plugin file
-│   ├── admin/               # Admin interface
-│   ├── includes/            # Core classes
-│   ├── public/              # Frontend assets
-│   ├── context/             # Knowledge files
-│   ├── uninstall.php        # Cleanup script
-│   └── README.md            # Documentation
-├── plugin-installs/         # Historical versions
-└── CLAUDE.md               # This file
-```
+### Key File Paths in Code
+- Context files: `GD_CHATBOT_PLUGIN_DIR . 'context/'`
+- Setlist CSVs: `GD_CHATBOT_PLUGIN_DIR . 'context/Deadshows/deadshows/'`
+- Disambiguation: `GD_CHATBOT_PLUGIN_DIR . 'context/grateful_dead_disambiguation_guide.md'`
 
 ## Usage Guidelines
 
@@ -114,7 +174,7 @@ gd-chatbot/
 5. Context is managed through the chat handler class
 
 ### For Content Creators
-1. Context files in the `context/` directory control domain knowledge
+1. Context files in `plugin/context/` control domain knowledge
 2. The system prompt can be customized in admin settings
 3. Disambiguation files help clarify ambiguous terms
 4. CSV files are used for structured data (setlists, songs, etc.)
@@ -127,16 +187,16 @@ gd-chatbot/
 5. Use shortcode `[gd_chatbot]` or enable floating widget
 
 ## Related Projects
-- **Original**: gd-claude-chatbot (v1.7.1 as base)
+- **Original**: gd-claude-chatbot (v1.7.1 as base, now in `archive/`)
 - **Derivatives**: ITI Chatbot, AI News Cafe chatbot, Scuba GPT chatbot
 - **Shared Libraries**: ITI Shared Libraries (for common components)
 
 ## Important Notes
-1. This is a production-ready plugin based on stable v1.7.1
-2. All .zip files from gd-claude-chatbot are preserved for version history
-3. Context files have been enhanced with current versions where appropriate
+1. This is a production-ready plugin
+2. All historical .zip files are preserved in `releases/`
+3. Legacy code is preserved in `archive/gd-claude-chatbot/` for reference
 4. The plugin maintains backward compatibility with v1.7.1 functionality
-5. Database table and option names use `gd_chatbot_` prefix (not `gd_claude_chatbot_`)
+5. Database table and option names use `gd_chatbot_` prefix
 
 ## Migration Path
 If migrating from gd-claude-chatbot:
