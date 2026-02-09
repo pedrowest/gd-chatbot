@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+*.dmg
+*.app
+
+# OS files
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Temporary
+*.tmp
+.cache/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Rust/Tauri
+target/
+Cargo.lock
+
+# Database
+*.db
+*.sqlite
+

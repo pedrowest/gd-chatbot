@@ -1,0 +1,172 @@
+# UPDATE THE GD-CHATBOT TO INCLUDE SUPPORT FOR SETLIST.FM and ARCHIVE.ORG
+
+- gd-chattbot is a Wordpress plugin
+- Personal Assistant is a MacOS App
+
+* Using the Personal Assistant integrations for SETLIT.FM and ARCHIVE.ORG as a guide to the features
+
+- Create the fuctionality to analyze a user's input in gd-chatbot, query stelist.fm and archive.org and inject results into the CONTEXT
+
+* We have previously created code to look at music being played and pull information from setlist.fm and archive.org
+- Look at the code a possible starting point for understanding this functionality.
+
+-- Previous Code:
+
+Step 1: Now Playing Context Injection (App.tsx)
+File: personal-assistant-app/src/App.tsx
+
+Goal: Make the AI aware of what's currently playing so it can give contextual responses.
+
+1a. Import getNowPlaying (line ~20)
+Add getNowPlaying to the existing musickit import.
+
+1b. Inject now playing into system prompt (after line ~1133, after playlist creation prompt)
+In sendMessage(), when currentAgent.id === MUSIC_ADVISOR_AGENT && musicKitAuthorized:
+
+
+const nowPlaying = getNowPlaying();
+if (nowPlaying) {
+  fullSystemPrompt += `\n\n---\n\n## CURRENTLY PLAYING\n\n`;
+  fullSystemPrompt += `**Track**: ${nowPlaying.title}\n`;
+  fullSystemPrompt += `**Artist**: ${nowPlaying.artist}\n`;
+  fullSystemPrompt += `**Album**: ${nowPlaying.album}\n`;
+  fullSystemPrompt += `**Status**: ${nowPlaying.isPlaying ? 'Playing' : 'Paused'}\n\n`;
+  fullSystemPrompt += `Use this context to inform your recommendations. If the user asks for "more like this" or similar, use this track as the reference point.\n`;
+}
+
+
+
+
+File: personal-assistant-app/src-tauri/src/music_apis/concert_apis.rs (NEW)
+
+New module with two API clients:
+
+Step 2: Concert API Module (Rust)
+File: personal-assistant-app/src-tauri/src/music_apis/concert_apis.rs (NEW)
+
+New module with two API clients:
+
+2a. SetlistFmClient
+
+pub struct SetlistFmClient {
+    client: reqwest::Client,
+    api_key: String,
+}
+Methods:
+
+new(api_key: &str) -> Self
+search_artist_setlists(&self, artist_name: &str, page: usize) -> Result<SetlistSearchResult>
+GET https://api.setlist.fm/rest/1.0/search/setlists?artistName={name}&p={page}
+Headers: x-api-key, Accept: application/json
+get_setlist(&self, setlist_id: &str) -> Result<Setlist>
+GET https://api.setlist.fm/rest/1.0/setlist/{id}
+search_venue_setlists(&self, venue_name: &str, city: &str) -> Result<SetlistSearchResult>
+GET https://api.setlist.fm/rest/1.0/search/setlists?venueName={name}&cityName={city}
+Response types:
+
+
+pub struct SetlistSearchResult {
+    pub total: i32,
+    pub items_per_page: i32,
+    pub setlists: Vec<Setlist>,
+}
+pub struct Setlist {
+    pub id: String,
+    pub event_date: String,       // "dd-MM-yyyy"
+    pub artist_name: String,
+    pub venue_name: String,
+    pub city: String,
+    pub state: Option<String>,
+    pub country: String,
+    pub tour_name: Option<String>,
+    pub sets: Vec<SetlistSet>,     // song lists per set
+}
+pub struct SetlistSet {
+    pub name: Option<String>,      // "Set 1", "Encore"
+    pub songs: Vec<SetlistSong>,
+}
+pub struct SetlistSong {
+    pub name: String,
+    pub info: Option<String>,      // "with jam", "tease", etc.
+    pub cover: Option<String>,     // original artist if cover
+}
+
+2b. ArchiveOrgClient
+
+pub struct ArchiveOrgClient {
+    client: reqwest::Client,
+}
+Methods:
+
+new() -> Self (no auth needed — public API)
+search_live_recordings(&self, artist: &str, year: Option<&str>, venue: Option<&str>) -> Result<Vec<ArchiveRecording>>
+GET https://archive.org/advancedsearch.php?q=collection:(COLLECTION)+AND+title:(ARTIST)&fl[]=identifier,title,date,venue,description,avg_rating,num_reviews,source&output=json&rows=25
+Collection mapping: "Grateful Dead" → GratefulDead, "Phish" → Phish, etc.
+Falls back to general etree collection for unknown artists
+get_recording_details(&self, identifier: &str) -> Result<ArchiveRecordingDetail>
+GET https://archive.org/metadata/{identifier}
+Returns track list, source info, taper notes
+Response types:
+
+
+pub struct ArchiveRecording {
+    pub identifier: String,        // e.g., "gd1977-05-08.sbd.hicks.4982.sbeok.shnf"
+    pub title: String,
+    pub date: Option<String>,
+    pub venue: Option<String>,
+    pub description: Option<String>,
+    pub avg_rating: Option<f64>,
+    pub num_reviews: Option<i32>,
+    pub source: Option<String>,    // SBD, AUD, MTX
+}
+pub struct ArchiveRecordingDetail {
+    pub identifier: String,
+    pub title: String,
+    pub date: Option<String>,
+    pub venue: Option<String>,
+    pub taper_notes: Option<String>,
+    pub source_info: Option<String>,
+    pub tracks: Vec<ArchiveTrack>,
+    pub stream_url: String,        // https://archive.org/details/{identifier}
+}
+pub struct ArchiveTrack {
+    pub name: String,
+    pub title: Option<String>,
+    pub length: Option<String>,    // "HH:MM:SS"
+    pub track_number: Option<i32>,
+    
+
+Step 3: Concert Tauri Commands (main.rs)
+File: personal-assistant-app/src-tauri/src/main.rs
+
+Add after playlist commands section:
+
+3a. Setlist.fm API key management
+
+#[tauri::command]
+fn save_setlistfm_api_key(api_key: String) -> Result<String, String>
+// Saves to Keychain using existing save_to_keychain helper
+
+#[tauri::command]
+fn load_setlistfm_api_key() -> Result<String, String>
+// Loads from Keychain using existing load_from_keychain helper
+
+3b. Concert search commands
+
+#[tauri::command]
+async fn search_setlists(artist: String, page: Option<usize>) -> Result<String, String>
+// Loads API key from Keychain, creates SetlistFmClient, calls search_artist_setlists
+// Returns JSON array of setlists
+
+#[tauri::command]
+async fn search_venue_setlists(venue: String, city: String) -> Result<String, String>
+// Same pattern, calls search_venue_setlists
+
+#[tauri::command]
+async fn search_archive_recordings(artist: String, year: Option<String>, venue: Option<String>) -> Result<String, String>
+// Creates ArchiveOrgClient, calls search_live_recordings
+// Returns JSON array of recordings
+
+#[tauri::command]
+async fn get_archive_recording_detail(identifier: String) -> Result<String, String>
+// Gets detailed recording with track list
