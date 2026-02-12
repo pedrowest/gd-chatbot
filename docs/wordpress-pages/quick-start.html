@@ -1,0 +1,449 @@
+<!-- GD Chatbot Quick Start Guide - WordPress Page HTML -->
+<!-- Copy and paste this entire content into a WordPress page in Text/HTML mode -->
+
+<div class="gd-quick-start-guide">
+    <style>
+        .gd-quick-start-guide {
+            max-width: 1200px;
+            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .gd-quick-start-guide h1 {
+            color: #1e40af;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .gd-quick-start-guide h2 {
+            color: #1e40af;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        .gd-quick-start-guide h3 {
+            color: #2563eb;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .gd-version-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .gd-info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .gd-success-box {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .gd-warning-box {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .gd-feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .gd-feature-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .gd-feature-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+        .gd-feature-card h4 {
+            color: #1e40af;
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+        .gd-step-number {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .gd-checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+        .gd-checklist li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        .gd-checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .gd-code-block {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", monospace;
+            font-size: 0.9em;
+            margin: 15px 0;
+        }
+        .gd-button {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            margin: 10px 10px 10px 0;
+        }
+        .gd-button:hover {
+            background: #2563eb;
+            color: white;
+        }
+        .gd-button-secondary {
+            background: #6b7280;
+        }
+        .gd-button-secondary:hover {
+            background: #4b5563;
+        }
+        @media (max-width: 768px) {
+            .gd-feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <h1>🎸 GD Chatbot Quick Start Guide <span class="gd-version-badge">v2.2.0</span></h1>
+
+    <div class="gd-success-box">
+        <strong>🎉 New in v2.2.0:</strong> Multi-platform music streaming! Click any song in the chatbot to hear it on Archive.org or connect your Spotify, Apple Music, YouTube Music, Amazon Music, or Tidal accounts.
+    </div>
+
+    <h2>⚡ 5-Minute Setup</h2>
+
+    <h3><span class="gd-step-number">1</span> Install the Plugin</h3>
+    <p>Upload and activate the GD Chatbot plugin from your WordPress admin:</p>
+    <ul>
+        <li>Go to <strong>Plugins → Add New → Upload Plugin</strong></li>
+        <li>Choose <code>gd-chatbot-2.2.0.zip</code></li>
+        <li>Click <strong>Install Now</strong> then <strong>Activate</strong></li>
+    </ul>
+
+    <h3><span class="gd-step-number">2</span> Configure API Keys</h3>
+    <p>Navigate to <strong>GD Chatbot v2 → Settings</strong> and enter your API credentials:</p>
+
+    <div class="gd-feature-grid">
+        <div class="gd-feature-card">
+            <h4>🤖 Claude API (Required)</h4>
+            <p>Get your API key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a></p>
+            <ul>
+                <li>Model: claude-sonnet-4-20250514</li>
+                <li>Temperature: 0.7</li>
+                <li>Max tokens: 4096</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>🔍 Tavily API (Optional)</h4>
+            <p>Get your API key from <a href="https://tavily.com/" target="_blank">Tavily</a></p>
+            <ul>
+                <li>Enables real-time web search</li>
+                <li>Trusted domain filtering</li>
+                <li>Search depth: basic/advanced</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>📌 Pinecone API (Optional)</h4>
+            <p>Get your API key from <a href="https://www.pinecone.io/" target="_blank">Pinecone</a></p>
+            <ul>
+                <li>Vector database for semantic search</li>
+                <li>Requires index name and namespace</li>
+                <li>Top-K results: 5</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3><span class="gd-step-number">3</span> Sync Archive.org Data (New!)</h3>
+    <p>Enable music streaming by syncing the Archive.org database:</p>
+    <ol>
+        <li>Go to <strong>GD Chatbot v2 → Music Streaming</strong></li>
+        <li>Click <strong>"Sync All Years"</strong></li>
+        <li>Wait 5-10 minutes for completion</li>
+        <li>Verify 2,340+ shows are synced</li>
+    </ol>
+
+    <div class="gd-info-box">
+        <strong>💡 Tip:</strong> The sync runs in the background. You can continue configuring other settings while it completes.
+    </div>
+
+    <h3><span class="gd-step-number">4</span> Add to Your Site</h3>
+    <p>Display the chatbot using the shortcode:</p>
+    <div class="gd-code-block">[gd_chatbot]</div>
+    <p>Or enable the floating widget from <strong>Settings → Shortcode</strong></p>
+
+    <h3><span class="gd-step-number">5</span> Test It!</h3>
+    <ul class="gd-checklist">
+        <li>Open the chatbot on your site</li>
+        <li>Ask: "Tell me about Dark Star"</li>
+        <li>Click the blue "Dark Star" link</li>
+        <li>Modal opens with Archive.org performances</li>
+        <li>Click "Play" to listen</li>
+    </ul>
+
+    <div class="gd-success-box">
+        <strong>✅ Done!</strong> Your chatbot is now live with music streaming capabilities.
+    </div>
+
+    <h2>🎵 Optional: Connect Streaming Services</h2>
+
+    <h3>For Administrators</h3>
+    <p>Configure API credentials for streaming services:</p>
+    <ol>
+        <li>Go to <strong>GD Chatbot v2 → Settings → Streaming Services</strong></li>
+        <li>Create developer accounts on desired services</li>
+        <li>Enter Client ID and Client Secret for each service</li>
+        <li>Add the Redirect URI to each service's app settings</li>
+        <li>Click <strong>"Test Connection"</strong> to verify</li>
+        <li>Click <strong>"Save All Configurations"</strong></li>
+    </ol>
+
+    <div class="gd-feature-grid">
+        <div class="gd-feature-card">
+            <h4>🎵 Spotify</h4>
+            <p><a href="https://developer.spotify.com/dashboard" target="_blank">Get Credentials</a></p>
+            <ul>
+                <li>Free to configure</li>
+                <li>70+ million songs</li>
+                <li>Popularity scores</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>🍎 Apple Music</h4>
+            <p><a href="https://developer.apple.com/" target="_blank">Get Credentials</a></p>
+            <ul>
+                <li>$99/year developer program</li>
+                <li>100+ million songs</li>
+                <li>JWT authentication</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>📺 YouTube Music</h4>
+            <p><a href="https://console.cloud.google.com/" target="_blank">Get Credentials</a></p>
+            <ul>
+                <li>Free to configure</li>
+                <li>Official videos & audio</li>
+                <li>Google OAuth 2.0</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>📦 Amazon Music</h4>
+            <p><a href="https://developer.amazon.com/" target="_blank">Get Credentials</a></p>
+            <ul>
+                <li>Free to configure</li>
+                <li>High-quality streaming</li>
+                <li>Login with Amazon</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>🌊 Tidal</h4>
+            <p><a href="https://developer.tidal.com/" target="_blank">Get Credentials</a></p>
+            <ul>
+                <li>Requires approval</li>
+                <li>Lossless audio quality</li>
+                <li>OAuth 2.0 + PKCE</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>For Users</h3>
+    <p>Once services are configured, users can connect their accounts:</p>
+    <ol>
+        <li>Go to <strong>Users → Your Profile</strong></li>
+        <li>Scroll to <strong>"Music Streaming Services"</strong></li>
+        <li>Click <strong>"Connect [Service]"</strong></li>
+        <li>Authorize in the popup window</li>
+        <li>Service appears as a tab in the song modal</li>
+    </ol>
+
+    <h2>🎯 Key Features</h2>
+
+    <div class="gd-feature-grid">
+        <div class="gd-feature-card">
+            <h4>🎸 Music Streaming</h4>
+            <p>Click any song mention to hear it instantly. Access 2,340+ Archive.org shows plus optional streaming services.</p>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>🔍 Smart Search</h4>
+            <p>Real-time web search with Tavily API. Trusted domain filtering for accurate Grateful Dead information.</p>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>📌 Vector Search</h4>
+            <p>Semantic search with Pinecone. Find relevant context from your knowledge base using AI embeddings.</p>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>🎨 Customizable</h4>
+            <p>Multiple themes, adjustable settings, and flexible deployment options (shortcode or floating widget).</p>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>🔒 Secure</h4>
+            <p>AES-256 encryption for credentials, OAuth 2.0 authentication, and enterprise-level security.</p>
+        </div>
+
+        <div class="gd-feature-card">
+            <h4>📱 Mobile Ready</h4>
+            <p>Fully responsive design. Beautiful experience on phones, tablets, and desktops.</p>
+        </div>
+    </div>
+
+    <h2>⚙️ Essential Settings</h2>
+
+    <h3>Claude Settings</h3>
+    <ul>
+        <li><strong>Model:</strong> claude-sonnet-4-20250514 (recommended)</li>
+        <li><strong>Temperature:</strong> 0.7 (balanced creativity)</li>
+        <li><strong>Max Tokens:</strong> 4096 (standard responses)</li>
+        <li><strong>System Prompt:</strong> Customize the chatbot's personality</li>
+    </ul>
+
+    <h3>Music Streaming Settings</h3>
+    <ul>
+        <li><strong>Enable Streaming:</strong> Turn music links on/off</li>
+        <li><strong>Default Sort:</strong> Most Popular, Date, or Rating</li>
+        <li><strong>Result Limit:</strong> 10-100 performances per song</li>
+        <li><strong>Cache Duration:</strong> 1-168 hours</li>
+    </ul>
+
+    <h3>Tavily Settings (Optional)</h3>
+    <ul>
+        <li><strong>Enable Search:</strong> Turn web search on/off</li>
+        <li><strong>Search Depth:</strong> Basic (faster) or Advanced (thorough)</li>
+        <li><strong>Max Results:</strong> 3-10 results per search</li>
+        <li><strong>Domain Filtering:</strong> Use trusted domains list</li>
+    </ul>
+
+    <h2>🧪 Testing Checklist</h2>
+
+    <ul class="gd-checklist">
+        <li>Chatbot appears on page with shortcode</li>
+        <li>Can send messages and receive responses</li>
+        <li>Song titles appear as blue links</li>
+        <li>Clicking song link opens modal</li>
+        <li>Archive.org results load in modal</li>
+        <li>Audio player works (click "Play")</li>
+        <li>Web search returns results (if Tavily enabled)</li>
+        <li>Mobile layout looks good</li>
+        <li>No JavaScript errors in console</li>
+    </ul>
+
+    <h2>🔧 Troubleshooting</h2>
+
+    <div class="gd-warning-box">
+        <h4>Song Links Not Appearing?</h4>
+        <ul>
+            <li>Go to <strong>Settings → Music Streaming</strong></li>
+            <li>Verify "Enable Music Streaming" is checked</li>
+            <li>Click "Clear Song Cache"</li>
+            <li>Refresh the page</li>
+        </ul>
+    </div>
+
+    <div class="gd-warning-box">
+        <h4>Modal Opens But No Results?</h4>
+        <ul>
+            <li>Go to <strong>Music Streaming</strong> dashboard</li>
+            <li>Check "Database Status" shows 2,340+ shows</li>
+            <li>If empty, click "Sync All Years"</li>
+            <li>Wait for sync to complete</li>
+        </ul>
+    </div>
+
+    <div class="gd-warning-box">
+        <h4>Chatbot Not Responding?</h4>
+        <ul>
+            <li>Verify Claude API key is correct</li>
+            <li>Check API key has sufficient credits</li>
+            <li>Look for errors in browser console (F12)</li>
+            <li>Check WordPress error logs</li>
+        </ul>
+    </div>
+
+    <h2>📚 Additional Resources</h2>
+
+    <div class="gd-info-box">
+        <h4>Documentation</h4>
+        <ul>
+            <li><strong>User Guide:</strong> How to connect streaming services</li>
+            <li><strong>Admin Guide:</strong> Complete configuration instructions</li>
+            <li><strong>Technical Docs:</strong> Implementation details and API reference</li>
+            <li><strong>Deployment Guide:</strong> Production deployment best practices</li>
+        </ul>
+    </div>
+
+    <h2>🎯 Next Steps</h2>
+
+    <ol>
+        <li><strong>Customize the System Prompt</strong> - Make the chatbot match your brand voice</li>
+        <li><strong>Configure Streaming Services</strong> - Enable Spotify, Apple Music, etc.</li>
+        <li><strong>Add to Multiple Pages</strong> - Use shortcode or floating widget</li>
+        <li><strong>Monitor Usage</strong> - Check conversation logs and sync status</li>
+        <li><strong>Train Your Users</strong> - Show them how to click song links</li>
+    </ol>
+
+    <div class="gd-success-box">
+        <h3>🎸 Ready to Rock!</h3>
+        <p>Your GD Chatbot is configured and ready to provide an amazing Grateful Dead experience with music streaming capabilities.</p>
+        <a href="#" class="gd-button">View Settings</a>
+        <a href="#" class="gd-button gd-button-secondary">View Documentation</a>
+    </div>
+
+    <hr style="margin: 40px 0; border: none; border-top: 2px solid #e5e7eb;">
+
+    <p style="text-align: center; color: #6b7280; font-size: 0.9em;">
+        <strong>GD Chatbot v2.2.0</strong> | Developed by IT Influentials | 
+        <a href="https://it-influentials.com" target="_blank">Visit Website</a>
+    </p>
+</div>

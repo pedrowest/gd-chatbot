@@ -72,6 +72,15 @@ class GD_Chatbot_Admin_Settings {
             self::PAGE_SLUG . '-conversations',
             array($this, 'render_conversations_page')
         );
+        
+        add_submenu_page(
+            self::PAGE_SLUG,
+            'Music Streaming',
+            'Music Streaming',
+            'manage_options',
+            self::PAGE_SLUG . '-streaming',
+            array($this, 'render_streaming_page')
+        );
     }
     
     /**
@@ -158,6 +167,38 @@ class GD_Chatbot_Admin_Settings {
 
         foreach ($token_settings as $setting) {
             register_setting('gd_chatbot_token', self::OPTION_PREFIX . $setting);
+        }
+        
+        // Music Streaming Settings
+        $streaming_settings = array(
+            'streaming_enabled',
+            'streaming_autoplay',
+            'streaming_default_sort',
+            'streaming_result_limit',
+            'streaming_cache_duration'
+        );
+        
+        foreach ($streaming_settings as $setting) {
+            register_setting('gd_chatbot_streaming', self::OPTION_PREFIX . $setting);
+        }
+        
+        // Streaming Services API Settings
+        $streaming_service_settings = array(
+            'spotify_client_id',
+            'spotify_client_secret',
+            'apple_music_team_id',
+            'apple_music_key_id',
+            'apple_music_developer_token',
+            'youtube_music_client_id',
+            'youtube_music_client_secret',
+            'amazon_music_client_id',
+            'amazon_music_client_secret',
+            'tidal_client_id',
+            'tidal_client_secret'
+        );
+        
+        foreach ($streaming_service_settings as $setting) {
+            register_setting('gd_chatbot_streaming_services', self::OPTION_PREFIX . $setting);
         }
     }
     
@@ -267,6 +308,14 @@ class GD_Chatbot_Admin_Settings {
                    class="nav-tab <?php echo $active_tab === 'token_optimization' ? 'nav-tab-active' : ''; ?>">
                     <span class="dashicons dashicons-performance"></span> Token Optimization
                 </a>
+                <a href="?page=<?php echo self::PAGE_SLUG; ?>&tab=streaming"
+                   class="nav-tab <?php echo $active_tab === 'streaming' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-format-audio"></span> Music Streaming
+                </a>
+                <a href="?page=<?php echo self::PAGE_SLUG; ?>&tab=streaming_services"
+                   class="nav-tab <?php echo $active_tab === 'streaming_services' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-share-alt"></span> Streaming Services
+                </a>
                 <a href="?page=<?php echo self::PAGE_SLUG; ?>&tab=shortcode"
                    class="nav-tab <?php echo $active_tab === 'shortcode' ? 'nav-tab-active' : ''; ?>">
                     <span class="dashicons dashicons-shortcode"></span> Shortcode
@@ -291,6 +340,12 @@ class GD_Chatbot_Admin_Settings {
                             break;
                         case 'token_optimization':
                             $this->render_token_optimization_settings();
+                            break;
+                        case 'streaming':
+                            $this->render_streaming_settings();
+                            break;
+                        case 'streaming_services':
+                            $this->render_streaming_services_settings();
                             break;
                         case 'shortcode':
                             $this->render_shortcode_info();
@@ -1401,6 +1456,224 @@ if (function_exists('gd_render_chatbot_v2')) {
                 <p class="no-data">No conversations recorded yet.</p>
             <?php endif; ?>
         </div>
+        <?php
+    }
+    
+    /**
+     * Render streaming dashboard page
+     */
+    public function render_streaming_page() {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        
+        require_once GD_CHATBOT_PLUGIN_DIR . 'admin/partials/streaming-dashboard.php';
+    }
+    
+    /**
+     * Render streaming services settings tab
+     */
+    private function render_streaming_services_settings() {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        
+        require_once GD_CHATBOT_PLUGIN_DIR . 'admin/partials/streaming-services-settings.php';
+    }
+    
+    /**
+     * Render streaming settings tab
+     */
+    private function render_streaming_settings() {
+        ?>
+        <form method="post" action="options.php">
+            <?php
+            settings_fields('gd_chatbot_streaming');
+            ?>
+            
+            <div class="gd-settings-section">
+                <h2>🎵 Music Streaming Settings</h2>
+                <p class="description">Configure how song links and Archive.org integration work in the chatbot.</p>
+                
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row">
+                            <label for="streaming_enabled">Enable Music Streaming</label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" 
+                                       name="<?php echo self::OPTION_PREFIX; ?>streaming_enabled" 
+                                       id="streaming_enabled"
+                                       value="1" 
+                                       <?php checked(get_option(self::OPTION_PREFIX . 'streaming_enabled'), 1); ?> />
+                                Enable clickable song links and Archive.org integration
+                            </label>
+                            <p class="description">
+                                When enabled, song titles in chatbot responses will be clickable and open a modal with Archive.org recordings.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <label for="streaming_default_sort">Default Sort Order</label>
+                        </th>
+                        <td>
+                            <select name="<?php echo self::OPTION_PREFIX; ?>streaming_default_sort" id="streaming_default_sort">
+                                <option value="downloads" <?php selected(get_option(self::OPTION_PREFIX . 'streaming_default_sort', 'downloads'), 'downloads'); ?>>
+                                    Most Popular (Downloads)
+                                </option>
+                                <option value="rating" <?php selected(get_option(self::OPTION_PREFIX . 'streaming_default_sort'), 'rating'); ?>>
+                                    Highest Rated
+                                </option>
+                                <option value="date" <?php selected(get_option(self::OPTION_PREFIX . 'streaming_default_sort'), 'date'); ?>>
+                                    Date (Oldest First)
+                                </option>
+                            </select>
+                            <p class="description">
+                                How performances should be sorted in the modal by default.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <label for="streaming_result_limit">Result Limit</label>
+                        </th>
+                        <td>
+                            <input type="number" 
+                                   name="<?php echo self::OPTION_PREFIX; ?>streaming_result_limit" 
+                                   id="streaming_result_limit"
+                                   value="<?php echo esc_attr(get_option(self::OPTION_PREFIX . 'streaming_result_limit', 50)); ?>"
+                                   min="10"
+                                   max="100"
+                                   step="10" />
+                            <p class="description">
+                                Maximum number of performances to display per song (10-100).
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <label for="streaming_cache_duration">Cache Duration (hours)</label>
+                        </th>
+                        <td>
+                            <input type="number" 
+                                   name="<?php echo self::OPTION_PREFIX; ?>streaming_cache_duration" 
+                                   id="streaming_cache_duration"
+                                   value="<?php echo esc_attr(get_option(self::OPTION_PREFIX . 'streaming_cache_duration', 24)); ?>"
+                                   min="1"
+                                   max="168"
+                                   step="1" />
+                            <p class="description">
+                                How long to cache Archive.org search results (1-168 hours). Default: 24 hours.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <label for="streaming_autoplay">Autoplay Behavior</label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" 
+                                       name="<?php echo self::OPTION_PREFIX; ?>streaming_autoplay" 
+                                       id="streaming_autoplay"
+                                       value="1" 
+                                       <?php checked(get_option(self::OPTION_PREFIX . 'streaming_autoplay'), 1); ?> />
+                                Automatically start playback when user clicks "Play"
+                            </label>
+                            <p class="description">
+                                Note: Some browsers may block autoplay. Users can always click play manually.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+                <?php submit_button('Save Streaming Settings'); ?>
+            </div>
+            
+            <!-- Song Detection Info -->
+            <div class="gd-settings-section">
+                <h2>🎸 Song Detection</h2>
+                
+                <?php
+                $song_detector = new GD_Song_Detector();
+                $song_count = $song_detector->get_song_count();
+                ?>
+                
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row">Songs in Database</th>
+                        <td>
+                            <strong><?php echo number_format($song_count); ?> songs</strong>
+                            <p class="description">
+                                Loaded from <code>plugin/context/reference/songs.csv</code>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">Cache Status</th>
+                        <td>
+                            <?php
+                            $cache_exists = get_transient('gd_chatbot_songs_list');
+                            if ($cache_exists):
+                            ?>
+                                <span style="color: green;">✓ Cached</span>
+                                <button type="button" class="button button-secondary" onclick="gdClearSongCache()">
+                                    Clear Song Cache
+                                </button>
+                            <?php else: ?>
+                                <span style="color: orange;">⚠ Not cached</span>
+                                <p class="description">Cache will be created on first use.</p>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="gd-settings-section">
+                <h2>🔗 Quick Links</h2>
+                
+                <p>
+                    <a href="?page=<?php echo self::PAGE_SLUG; ?>-streaming" class="button button-primary">
+                        <span class="dashicons dashicons-dashboard"></span> View Streaming Dashboard
+                    </a>
+                    
+                    <a href="https://archive.org/details/GratefulDead" class="button button-secondary" target="_blank">
+                        <span class="dashicons dashicons-external"></span> Archive.org Collection
+                    </a>
+                </p>
+            </div>
+        </form>
+        
+        <script>
+        function gdClearSongCache() {
+            if (!confirm('Clear song detection cache? It will be rebuilt on next use.')) return;
+            
+            jQuery.ajax({
+                url: ajaxurl,
+                method: 'POST',
+                data: {
+                    action: 'gd_chatbot_clear_song_cache',
+                    nonce: '<?php echo wp_create_nonce('gd_chatbot_nonce'); ?>'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert('Song cache cleared!');
+                        location.reload();
+                    } else {
+                        alert('Failed to clear cache');
+                    }
+                }
+            });
+        }
+        </script>
         <?php
     }
 }

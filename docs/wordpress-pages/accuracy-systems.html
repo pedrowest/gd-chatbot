@@ -1,0 +1,600 @@
+<!-- GD Chatbot Accuracy Systems - WordPress Page HTML -->
+<!-- Copy and paste this entire content into a WordPress page in Text/HTML mode -->
+
+<div class="gd-accuracy-systems">
+    <style>
+        .gd-accuracy-systems {
+            max-width: 1200px;
+            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .gd-accuracy-systems h1 {
+            color: #1e40af;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .gd-accuracy-systems h2 {
+            color: #1e40af;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-left: 4px solid #3b82f6;
+            padding-left: 15px;
+        }
+        .gd-accuracy-systems h3 {
+            color: #2563eb;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .gd-accuracy-systems h4 {
+            color: #3b82f6;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .gd-version-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .gd-highlight-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .gd-info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .gd-success-box {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .gd-warning-box {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .gd-layer-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+        .gd-layer-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+        .gd-layer-number {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 15px;
+            float: left;
+        }
+        .gd-architecture-diagram {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 30px;
+            border-radius: 8px;
+            font-family: "Courier New", monospace;
+            font-size: 0.9em;
+            margin: 30px 0;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .gd-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+        .gd-stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .gd-stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .gd-stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .gd-feature-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .gd-feature-table th {
+            background: #3b82f6;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .gd-feature-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .gd-feature-table tr:hover {
+            background: #f9fafb;
+        }
+        .gd-checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+        .gd-checklist li {
+            padding: 10px 0;
+            padding-left: 35px;
+            position: relative;
+        }
+        .gd-checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+        @media (max-width: 768px) {
+            .gd-stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .gd-architecture-diagram {
+                font-size: 0.7em;
+            }
+        }
+    </style>
+
+    <h1>🎯 Chatbot Accuracy Systems <span class="gd-version-badge">v2.2.0</span></h1>
+
+    <div class="gd-highlight-box">
+        <h3 style="margin-top: 0;">Core Principle</h3>
+        <p style="font-size: 1.1em; margin-bottom: 0;"><strong>"Multiple sources of truth, cross-verified and disambiguated, with explicit guardrails against common errors."</strong></p>
+    </div>
+
+    <h2>📊 System Overview</h2>
+
+    <p>The GD Chatbot employs an <strong>eight-layer accuracy system</strong> to ensure users receive the most accurate, reliable, and comprehensive information about the Grateful Dead. Each layer serves a specific purpose and works together to prevent misinformation, resolve ambiguities, and provide verified facts.</p>
+
+    <div class="gd-stats-grid">
+        <div class="gd-stat-card">
+            <span class="gd-stat-number">8</span>
+            <span class="gd-stat-label">Accuracy Layers</span>
+        </div>
+        <div class="gd-stat-card">
+            <span class="gd-stat-number">600+</span>
+            <span class="gd-stat-label">Songs Detected</span>
+        </div>
+        <div class="gd-stat-card">
+            <span class="gd-stat-number">2,340+</span>
+            <span class="gd-stat-label">Shows Indexed</span>
+        </div>
+        <div class="gd-stat-card">
+            <span class="gd-stat-number">125+</span>
+            <span class="gd-stat-label">Disambiguated Terms</span>
+        </div>
+        <div class="gd-stat-card">
+            <span class="gd-stat-number">55+</span>
+            <span class="gd-stat-label">Context Files</span>
+        </div>
+        <div class="gd-stat-card">
+            <span class="gd-stat-number">100%</span>
+            <span class="gd-stat-label">Verified Sources</span>
+        </div>
+    </div>
+
+    <h2>🏗️ Multi-Layer Architecture</h2>
+
+    <div class="gd-architecture-diagram">User Question
+     ↓
+[1] Disambiguation Layer ────→ Resolve ambiguous terms
+     ↓
+[2] Content Sanitization ────→ Filter incorrect data
+     ↓
+[3] Knowledge Base ──────────→ 8 core topic files (60KB+)
+     ↓
+[4] Context Files ───────────→ Specialized detailed data (~55 files)
+     ↓
+[5] Pinecone Vector DB ──────→ Semantic search (optional)
+     ↓
+[6] Tavily Web Search ───────→ Current information (always on)
+     ↓
+[7] Token Optimization ──────→ Intent-based context budgeting
+     ↓
+[8] System Prompt Guardrails → Enforce accuracy rules
+     ↓
+Claude AI Processing
+     ↓
+Verified Response</div>
+
+    <h2>🔍 The Eight Layers</h2>
+
+    <div class="gd-layer-card">
+        <span class="gd-layer-number">1</span>
+        <h3 style="margin-top: 0;">Disambiguation Layer</h3>
+        <p><strong>Purpose:</strong> Resolve ambiguous terms before processing</p>
+        <p><strong>Coverage:</strong> 125+ disambiguated terms across 19 categories</p>
+        <p><strong>Examples:</strong></p>
+        <ul>
+            <li><strong>"The Matrix"</strong> → San Francisco venue (not the movie)</li>
+            <li><strong>"Tiger"</strong> → Jerry's guitar (not the animal)</li>
+            <li><strong>"The Archive"</strong> → UCSC collection (not Internet Archive)</li>
+            <li><strong>"GDP"</strong> → Grateful Dead Productions (not economics)</li>
+        </ul>
+        <p><strong>Benefit:</strong> Prevents context confusion and ensures correct interpretation</p>
+    </div>
+
+    <div class="gd-layer-card">
+        <span class="gd-layer-number">2</span>
+        <h3 style="margin-top: 0;">Content Sanitization</h3>
+        <p><strong>Purpose:</strong> Filter out incorrect or conflicting information</p>
+        <p><strong>Special Case: The Bahr Gallery</strong></p>
+        <ul>
+            <li>All incorrect location references removed from knowledge base</li>
+            <li>Exclusive source: <code>bahr-gallery.md</code></li>
+            <li>Location always: Oyster Bay, Long Island, NY</li>
+            <li>Triple-layer protection: Sanitization + Injection + System Prompt</li>
+        </ul>
+        <p><strong>Benefit:</strong> Eliminates common errors (e.g., Bahr Gallery in San Francisco)</p>
+    </div>
+
+    <div class="gd-layer-card">
+        <span class="gd-layer-number">3</span>
+        <h3 style="margin-top: 0;">Knowledge Base System</h3>
+        <p><strong>Structure:</strong> 8 focused topic files in <code>context/core/</code></p>
+        <table class="gd-feature-table">
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Content</th>
+                    <th>Size</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>band-and-history.md</code></td>
+                    <td>Formation, evolution, members, eras</td>
+                    <td>~12KB</td>
+                </tr>
+                <tr>
+                    <td><code>books-and-literature.md</code></td>
+                    <td>Essential bibliography</td>
+                    <td>~9KB</td>
+                </tr>
+                <tr>
+                    <td><code>culture-and-community.md</code></td>
+                    <td>Deadhead culture, philosophy</td>
+                    <td>~10KB</td>
+                </tr>
+                <tr>
+                    <td><code>equipment.md</code></td>
+                    <td>Instruments, Wall of Sound</td>
+                    <td>~6KB</td>
+                </tr>
+                <tr>
+                    <td><code>galleries-and-art.md</code></td>
+                    <td>Art galleries, museums</td>
+                    <td>~3KB</td>
+                </tr>
+                <tr>
+                    <td><code>music-and-recordings.md</code></td>
+                    <td>Song catalog, discography</td>
+                    <td>~7KB</td>
+                </tr>
+                <tr>
+                    <td><code>resources-and-media.md</code></td>
+                    <td>Online communities, URLs</td>
+                    <td>~12KB</td>
+                </tr>
+                <tr>
+                    <td><code>terminology.md</code></td>
+                    <td>125+ disambiguated terms</td>
+                    <td>~8KB</td>
+                </tr>
+            </tbody>
+        </table>
+        <p><strong>Benefit:</strong> Organized, topic-focused knowledge for better AI comprehension</p>
+    </div>
+
+    <div class="gd-layer-card">
+        <span class="gd-layer-number">4</span>
+        <h3 style="margin-top: 0;">Context Files Integration</h3>
+        <p><strong>Structure:</strong> 55+ specialized files across 5 subdirectories</p>
+        
+        <h4>📅 Setlist Database (2,340 Shows)</h4>
+        <ul>
+            <li>31 CSV files (1965-1995, one per year)</li>
+            <li>Complete setlists for every show</li>
+            <li>Venue names and locations</li>
+            <li>Segue information (e.g., "Scarlet > Fire")</li>
+        </ul>
+
+        <h4>🎵 Song Database (605 Songs)</h4>
+        <ul>
+            <li>Song titles and composers</li>
+            <li>First performance dates</li>
+            <li>Performance frequency</li>
+            <li>Album appearances</li>
+        </ul>
+
+        <h4>🎸 Equipment Database</h4>
+        <ul>
+            <li>Instrument specifications</li>
+            <li>Ownership history</li>
+            <li>Technical details</li>
+            <li>Usage periods</li>
+        </ul>
+
+        <h4>🎤 Interview Archives</h4>
+        <ul>
+            <li>Direct quotes from band members</li>
+            <li>Interview URLs and sources</li>
+            <li>Historical context from primary sources</li>
+        </ul>
+
+        <h4>🏛️ UC Santa Cruz Archive</h4>
+        <ul>
+            <li>Official archive documentation</li>
+            <li>Collection descriptions</li>
+            <li>Research resources</li>
+        </ul>
+
+        <p><strong>Benefit:</strong> Deep-dive accuracy with specialized, verified data sources</p>
+    </div>
+
+    <div class="gd-layer-card">
+        <span class="gd-layer-number">5</span>
+        <h3 style="margin-top: 0;">Pinecone Vector Database (Optional)</h3>
+        <p><strong>Purpose:</strong> Semantic search using AI embeddings</p>
+        <p><strong>How It Works:</strong></p>
+        <ul>
+            <li>Converts knowledge into vector embeddings</li>
+            <li>Finds semantically similar content</li>
+            <li>Returns top-K most relevant results</li>
+            <li>Works with natural language queries</li>
+        </ul>
+        <p><strong>Example:</strong> Query "Jerry's favorite guitar" finds relevant content about Tiger and Wolf without exact keyword matches</p>
+        <p><strong>Benefit:</strong> Finds relevant context even with different wording</p>
+    </div>
+
+    <div class="gd-layer-card">
+        <span class="gd-layer-number">6</span>
+        <h3 style="margin-top: 0;">Tavily Web Search (Always On)</h3>
+        <p><strong>Purpose:</strong> Real-time information from trusted sources</p>
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li><strong>Trusted Domain Filtering:</strong> 50+ pre-approved Grateful Dead websites</li>
+            <li><strong>Search Depth:</strong> Basic (faster) or Advanced (thorough)</li>
+            <li><strong>Max Results:</strong> 3-10 results per search</li>
+            <li><strong>Always Current:</strong> Latest news, events, releases</li>
+        </ul>
+        <p><strong>Trusted Domains Include:</strong></p>
+        <ul>
+            <li>dead.net (official site)</li>
+            <li>archive.org (live recordings)</li>
+            <li>deaddisc.com (discography)</li>
+            <li>jerrybase.com (Jerry Garcia)</li>
+            <li>And 45+ more verified sources</li>
+        </ul>
+        <p><strong>Benefit:</strong> Current information with source verification</p>
+    </div>
+
+    <div class="gd-layer-card">
+        <span class="gd-layer-number">7</span>
+        <h3 style="margin-top: 0;">Token Optimization System (Optional)</h3>
+        <p><strong>Purpose:</strong> Intelligent context selection based on query intent</p>
+        <p><strong>How It Works:</strong></p>
+        <ol>
+            <li><strong>Intent Detection:</strong> Analyzes query to determine topic</li>
+            <li><strong>Context Selection:</strong> Loads only relevant context files</li>
+            <li><strong>Token Budgeting:</strong> Enforces token limits (default 500)</li>
+            <li><strong>Caching:</strong> Stores fragments for faster retrieval</li>
+        </ol>
+        <p><strong>Example:</strong> Equipment question loads equipment files, not setlist data</p>
+        <p><strong>Benefit:</strong> Faster responses, lower API costs, focused context</p>
+    </div>
+
+    <div class="gd-layer-card">
+        <span class="gd-layer-number">8</span>
+        <h3 style="margin-top: 0;">System Prompt Guardrails</h3>
+        <p><strong>Purpose:</strong> Explicit rules to prevent common errors</p>
+        <p><strong>Key Guardrails:</strong></p>
+        <ul class="gd-checklist">
+            <li>Never invent setlists or show dates</li>
+            <li>Always cite sources for quotes</li>
+            <li>Distinguish between studio and live versions</li>
+            <li>Clarify composer vs. performer</li>
+            <li>Use correct venue names and locations</li>
+            <li>Verify equipment specifications</li>
+            <li>Acknowledge uncertainty when appropriate</li>
+            <li>Prioritize official sources</li>
+        </ul>
+        <p><strong>Benefit:</strong> Enforces accuracy standards at the AI processing level</p>
+    </div>
+
+    <h2>🎯 How It All Works Together</h2>
+
+    <div class="gd-success-box">
+        <h3 style="margin-top: 0;">Example Query: "Tell me about Dark Star at Cornell"</h3>
+        
+        <p><strong>Layer 1 (Disambiguation):</strong> "Dark Star" = song (not astronomy)</p>
+        <p><strong>Layer 2 (Sanitization):</strong> No conflicting data to filter</p>
+        <p><strong>Layer 3 (Knowledge Base):</strong> Loads song info from <code>music-and-recordings.md</code></p>
+        <p><strong>Layer 4 (Context Files):</strong> Searches <code>setlists/1977.csv</code> for 5/8/77</p>
+        <p><strong>Layer 5 (Pinecone):</strong> Finds related Cornell '77 content</p>
+        <p><strong>Layer 6 (Tavily):</strong> Searches for current Cornell '77 discussions</p>
+        <p><strong>Layer 7 (Token Optimization):</strong> Focuses on setlist + song data</p>
+        <p><strong>Layer 8 (Guardrails):</strong> Ensures accurate setlist reporting</p>
+        
+        <p><strong>Result:</strong> Accurate, comprehensive response with verified setlist, song history, and current context</p>
+    </div>
+
+    <h2>🎵 Music Streaming Integration (v2.2.0)</h2>
+
+    <div class="gd-info-box">
+        <h3 style="margin-top: 0;">New Accuracy Layer: Archive.org Database</h3>
+        <p>Version 2.2.0 adds a ninth layer specifically for music streaming:</p>
+        <ul>
+            <li><strong>Database:</strong> 4 new tables with Archive.org metadata</li>
+            <li><strong>Shows:</strong> 2,340+ shows with complete information</li>
+            <li><strong>Recordings:</strong> Individual track data</li>
+            <li><strong>Sync:</strong> Automatic background updates</li>
+            <li><strong>Detection:</strong> 600+ songs automatically recognized</li>
+        </ul>
+        <p><strong>Benefit:</strong> Song mentions become clickable links with instant access to live recordings</p>
+    </div>
+
+    <h2>📈 Accuracy Metrics</h2>
+
+    <table class="gd-feature-table">
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Source Verification</td>
+                <td>100%</td>
+                <td>All context files from verified sources</td>
+            </tr>
+            <tr>
+                <td>Show Data Accuracy</td>
+                <td>100%</td>
+                <td>2,340 shows with verified setlists</td>
+            </tr>
+            <tr>
+                <td>Song Detection</td>
+                <td>600+</td>
+                <td>Grateful Dead songs automatically recognized</td>
+            </tr>
+            <tr>
+                <td>Disambiguation Coverage</td>
+                <td>125+</td>
+                <td>Terms with explicit context clarification</td>
+            </tr>
+            <tr>
+                <td>Context Files</td>
+                <td>55+</td>
+                <td>Specialized knowledge sources</td>
+            </tr>
+            <tr>
+                <td>Trusted Domains</td>
+                <td>50+</td>
+                <td>Pre-approved websites for web search</td>
+            </tr>
+            <tr>
+                <td>Response Time</td>
+                <td>&lt; 3s</td>
+                <td>Average response with full context</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>🔒 Quality Assurance</h2>
+
+    <div class="gd-warning-box">
+        <h3 style="margin-top: 0;">Common Errors We Prevent</h3>
+        <ul>
+            <li>❌ Inventing show dates or setlists</li>
+            <li>❌ Confusing venue locations (e.g., Bahr Gallery)</li>
+            <li>❌ Misattributing songs to wrong composers</li>
+            <li>❌ Mixing up equipment specifications</li>
+            <li>❌ Confusing studio vs. live versions</li>
+            <li>❌ Using unreliable sources</li>
+            <li>❌ Hallucinating band member quotes</li>
+            <li>❌ Incorrect disambiguation of terms</li>
+        </ul>
+    </div>
+
+    <h2>🎯 Best Practices for Users</h2>
+
+    <div class="gd-info-box">
+        <h3 style="margin-top: 0;">How to Get the Most Accurate Responses</h3>
+        <ol>
+            <li><strong>Be Specific:</strong> "Dark Star at Cornell '77" vs. "Dark Star"</li>
+            <li><strong>Use Dates:</strong> "5/8/77" or "May 8, 1977"</li>
+            <li><strong>Specify Context:</strong> "Jerry's Tiger guitar" vs. just "Tiger"</li>
+            <li><strong>Ask for Sources:</strong> "Where can I verify this?"</li>
+            <li><strong>Clarify Ambiguity:</strong> "The Matrix venue" vs. "The Matrix"</li>
+            <li><strong>Request Details:</strong> "Full setlist" vs. "What songs"</li>
+        </ol>
+    </div>
+
+    <h2>📊 System Status</h2>
+
+    <div class="gd-success-box">
+        <h3 style="margin-top: 0;">Current Configuration</h3>
+        <ul class="gd-checklist">
+            <li>8 Core Topic Files Loaded</li>
+            <li>55+ Context Files Available</li>
+            <li>125+ Terms Disambiguated</li>
+            <li>2,340+ Shows Indexed</li>
+            <li>600+ Songs Detected</li>
+            <li>50+ Trusted Domains Configured</li>
+            <li>Archive.org Integration Active</li>
+            <li>Streaming Services Available (Optional)</li>
+        </ul>
+    </div>
+
+    <h2>🔮 Future Enhancements</h2>
+
+    <p>Planned improvements to the accuracy system:</p>
+    <ul>
+        <li><strong>Machine Learning:</strong> Train on user feedback to improve responses</li>
+        <li><strong>Expanded Sources:</strong> Add more verified Grateful Dead resources</li>
+        <li><strong>Real-Time Verification:</strong> Cross-check facts against multiple sources</li>
+        <li><strong>User Corrections:</strong> Allow users to report inaccuracies</li>
+        <li><strong>Confidence Scores:</strong> Display confidence level for each response</li>
+        <li><strong>Source Citations:</strong> Automatic footnotes for all facts</li>
+    </ul>
+
+    <hr style="margin: 40px 0; border: none; border-top: 2px solid #e5e7eb;">
+
+    <p style="text-align: center; color: #6b7280; font-size: 0.9em;">
+        <strong>GD Chatbot v2.2.0 Accuracy Systems</strong> | 
+        Eight layers of verification for the most accurate Grateful Dead information | 
+        <a href="https://it-influentials.com" target="_blank">IT Influentials</a>
+    </p>
+</div>

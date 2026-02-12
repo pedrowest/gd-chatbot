@@ -1,0 +1,652 @@
+<!-- GD Chatbot Version History - WordPress Page HTML -->
+<!-- Copy and paste this entire content into a WordPress page in Text/HTML mode -->
+
+<div class="gd-version-history">
+    <style>
+        .gd-version-history {
+            max-width: 1200px;
+            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .gd-version-history h1 {
+            color: #1e40af;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .gd-version-history h2 {
+            color: #1e40af;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        .gd-version-history h3 {
+            color: #2563eb;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .gd-version-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .gd-version-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        .gd-version-card.current {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+        }
+        .gd-version-card.major {
+            border-color: #3b82f6;
+        }
+        .gd-version-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .gd-version-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1e40af;
+        }
+        .gd-version-date {
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        .gd-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .gd-badge-current {
+            background: #10b981;
+            color: white;
+        }
+        .gd-badge-major {
+            background: #3b82f6;
+            color: white;
+        }
+        .gd-badge-minor {
+            background: #6b7280;
+            color: white;
+        }
+        .gd-badge-patch {
+            background: #f59e0b;
+            color: white;
+        }
+        .gd-feature-list {
+            margin: 15px 0;
+        }
+        .gd-feature-category {
+            margin: 20px 0;
+        }
+        .gd-feature-category h4 {
+            color: #3b82f6;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .gd-feature-list ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .gd-feature-list li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        .gd-feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .gd-feature-list li.removed:before {
+            content: "✗";
+            color: #ef4444;
+        }
+        .gd-feature-list li.changed:before {
+            content: "↻";
+            color: #f59e0b;
+        }
+        .gd-stats-row {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .gd-stat-box {
+            flex: 1;
+            min-width: 150px;
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+        .gd-stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3b82f6;
+            display: block;
+        }
+        .gd-stat-label {
+            font-size: 0.9em;
+            color: #6b7280;
+        }
+        .gd-timeline {
+            position: relative;
+            padding-left: 40px;
+            margin: 30px 0;
+        }
+        .gd-timeline:before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+        .gd-timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .gd-timeline-dot {
+            position: absolute;
+            left: -32px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        .gd-timeline-dot.current {
+            background: #10b981;
+            box-shadow: 0 0 0 2px #10b981;
+        }
+        .gd-info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        @media (max-width: 768px) {
+            .gd-version-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .gd-stats-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+    <h1>📜 GD Chatbot Version History</h1>
+
+    <div class="gd-info-box">
+        <p><strong>Current Version:</strong> v2.2.0 (February 12, 2026)</p>
+        <p><strong>Latest Feature:</strong> Multi-platform music streaming integration with Archive.org and 5 streaming services</p>
+    </div>
+
+    <h2>🚀 Release Timeline</h2>
+
+    <div class="gd-timeline">
+        <div class="gd-timeline-item">
+            <div class="gd-timeline-dot current"></div>
+            <strong>v2.2.0</strong> - February 12, 2026 - Music Streaming Integration
+        </div>
+        <div class="gd-timeline-item">
+            <div class="gd-timeline-dot"></div>
+            <strong>v2.0.8</strong> - February 11, 2026 - Token Management & Optimization
+        </div>
+        <div class="gd-timeline-item">
+            <div class="gd-timeline-dot"></div>
+            <strong>v2.0.7</strong> - February 9, 2026 - Context Reorganization
+        </div>
+        <div class="gd-timeline-item">
+            <div class="gd-timeline-dot"></div>
+            <strong>v2.0.0</strong> - January 12, 2026 - Major Rebranding
+        </div>
+        <div class="gd-timeline-item">
+            <div class="gd-timeline-dot"></div>
+            <strong>v1.7.1</strong> - January 10, 2026 - Original Base Version
+        </div>
+    </div>
+
+    <!-- Version 2.2.0 -->
+    <div class="gd-version-card current major">
+        <div class="gd-version-header">
+            <div>
+                <span class="gd-version-number">v2.2.0</span>
+                <span class="gd-badge gd-badge-current">CURRENT</span>
+                <span class="gd-badge gd-badge-major">MAJOR</span>
+            </div>
+            <div class="gd-version-date">February 12, 2026</div>
+        </div>
+
+        <h3>🎵 Multi-Platform Music Streaming Integration</h3>
+        <p>The biggest feature release yet! Complete music streaming integration across 6 platforms.</p>
+
+        <div class="gd-stats-row">
+            <div class="gd-stat-box">
+                <span class="gd-stat-number">6</span>
+                <span class="gd-stat-label">Music Platforms</span>
+            </div>
+            <div class="gd-stat-box">
+                <span class="gd-stat-number">2,340+</span>
+                <span class="gd-stat-label">Shows Indexed</span>
+            </div>
+            <div class="gd-stat-box">
+                <span class="gd-stat-number">600+</span>
+                <span class="gd-stat-label">Songs Detected</span>
+            </div>
+            <div class="gd-stat-box">
+                <span class="gd-stat-number">125</span>
+                <span class="gd-stat-label">Files in Package</span>
+            </div>
+        </div>
+
+        <div class="gd-feature-category">
+            <h4>🎸 Archive.org Integration</h4>
+            <ul>
+                <li>Automatic song detection in chatbot responses (600+ songs)</li>
+                <li>Interactive song links with hover effects</li>
+                <li>Beautiful modal UI with performance list</li>
+                <li>In-modal audio player for Archive.org recordings</li>
+                <li>Sort by popularity, date, or rating</li>
+                <li>2,340+ shows indexed (1965-1995)</li>
+                <li>4 new database tables for metadata</li>
+                <li>Background sync service</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-category">
+            <h4>🎵 Streaming Services Integration</h4>
+            <ul>
+                <li>Spotify integration with OAuth 2.0</li>
+                <li>Apple Music integration with JWT tokens</li>
+                <li>YouTube Music integration</li>
+                <li>Amazon Music integration</li>
+                <li>Tidal integration with PKCE</li>
+                <li>Unified search across all platforms</li>
+                <li>Dynamic source tabs in modal</li>
+                <li>Service-specific result cards</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-category">
+            <h4>🔒 Security Features</h4>
+            <ul>
+                <li>AES-256-CBC encryption for credentials</li>
+                <li>OAuth 2.0 with CSRF protection</li>
+                <li>Secure token storage in WordPress user meta</li>
+                <li>Automatic token refresh</li>
+                <li>Connection status tracking</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-category">
+            <h4>⚙️ Admin Features</h4>
+            <ul>
+                <li>Complete music streaming dashboard</li>
+                <li>Sync management (incremental, year, date, full)</li>
+                <li>Database health monitoring</li>
+                <li>Song detection testing tool</li>
+                <li>Streaming services configuration UI</li>
+                <li>Service status overview</li>
+                <li>Connected user tracking</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-category">
+            <h4>👤 User Features</h4>
+            <ul>
+                <li>User profile integration</li>
+                <li>Connect/disconnect streaming services</li>
+                <li>OAuth popup flow</li>
+                <li>Connection status display</li>
+                <li>Token expiration warnings</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-category">
+            <h4>📱 Frontend Enhancements</h4>
+            <ul>
+                <li>Responsive modal design</li>
+                <li>Source tabs for multiple platforms</li>
+                <li>Album art thumbnails</li>
+                <li>Quality badges (Tidal)</li>
+                <li>Popularity scores (Spotify)</li>
+                <li>Mobile-optimized layout</li>
+            </ul>
+        </div>
+
+        <p><strong>Package Size:</strong> 398KB | <strong>Files:</strong> 125 | <strong>Development Time:</strong> 30 hours</p>
+    </div>
+
+    <!-- Version 2.0.8 -->
+    <div class="gd-version-card major">
+        <div class="gd-version-header">
+            <div>
+                <span class="gd-version-number">v2.0.8</span>
+                <span class="gd-badge gd-badge-major">MAJOR</span>
+            </div>
+            <div class="gd-version-date">February 11, 2026</div>
+        </div>
+
+        <h3>🎯 Token Management & Optimization System</h3>
+        <p>Intelligent context management for faster responses and lower costs.</p>
+
+        <div class="gd-feature-category">
+            <h4>New Features</h4>
+            <ul>
+                <li>Token Budget Manager for context optimization</li>
+                <li>Query Optimizer with intent detection</li>
+                <li>Context Builder for dynamic context assembly</li>
+                <li>Context Cache using WordPress transients</li>
+                <li>Token Estimator for accurate counting</li>
+                <li>Admin toggle for optimization on/off</li>
+                <li>Default 500-token budget (configurable)</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-category">
+            <h4>Performance Improvements</h4>
+            <ul>
+                <li>50% reduction in context tokens</li>
+                <li>Faster response times</li>
+                <li>Lower API costs</li>
+                <li>Cached context fragments</li>
+            </ul>
+        </div>
+
+        <p><strong>Package Size:</strong> 344KB | <strong>Files:</strong> 110</p>
+    </div>
+
+    <!-- Version 2.0.7 -->
+    <div class="gd-version-card">
+        <div class="gd-version-header">
+            <div>
+                <span class="gd-version-number">v2.0.7</span>
+                <span class="gd-badge gd-badge-minor">MINOR</span>
+            </div>
+            <div class="gd-version-date">February 9, 2026</div>
+        </div>
+
+        <h3>📁 Context Files Reorganization</h3>
+        <p>Major restructuring of knowledge base for better organization and maintenance.</p>
+
+        <div class="gd-feature-category">
+            <h4>Knowledge Base Changes</h4>
+            <ul>
+                <li>Split monolithic context file into 8 topic files</li>
+                <li>Created <code>context/core/</code> directory</li>
+                <li>Created <code>context/disambiguation/</code> directory</li>
+                <li>Created <code>context/reference/</code> directory</li>
+                <li>Created <code>context/supplementary/</code> directory</li>
+                <li>Created <code>context/setlists/</code> directory</li>
+                <li>Moved archive files to <code>context/_archive/</code></li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-category">
+            <h4>Code Improvements</h4>
+            <ul>
+                <li>Updated context loading to use glob patterns</li>
+                <li>Automatic file discovery</li>
+                <li>Better AI focus with topic-based files</li>
+                <li>Easier maintenance</li>
+            </ul>
+        </div>
+
+        <p><strong>Package Size:</strong> 346KB | <strong>Files:</strong> 105</p>
+    </div>
+
+    <!-- Version 2.0.0 -->
+    <div class="gd-version-card major">
+        <div class="gd-version-header">
+            <div>
+                <span class="gd-version-number">v2.0.0</span>
+                <span class="gd-badge gd-badge-major">MAJOR</span>
+            </div>
+            <div class="gd-version-date">January 12, 2026</div>
+        </div>
+
+        <h3>🎨 Major Rebranding & Refactoring</h3>
+        <p>Complete plugin rebrand from "GD Claude Chatbot" to "GD Chatbot v2".</p>
+
+        <div class="gd-feature-category">
+            <h4>Rebranding Changes</h4>
+            <ul>
+                <li>Plugin name: GD Claude Chatbot → GD Chatbot v2</li>
+                <li>Text domain: gd-claude-chatbot → gd-chatbot</li>
+                <li>Class prefix: GD_Claude_Chatbot → GD_Chatbot</li>
+                <li>Function prefix updates throughout</li>
+                <li>Updated all documentation</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-category">
+            <h4>Code Improvements</h4>
+            <ul>
+                <li>Consistent naming conventions</li>
+                <li>Improved code organization</li>
+                <li>Better WordPress integration</li>
+                <li>Updated admin interface</li>
+            </ul>
+        </div>
+
+        <p><strong>Package Size:</strong> 256KB | <strong>Files:</strong> 95</p>
+    </div>
+
+    <!-- Version 1.7.1 -->
+    <div class="gd-version-card">
+        <div class="gd-version-header">
+            <div>
+                <span class="gd-version-number">v1.7.1</span>
+                <span class="gd-badge gd-badge-minor">STABLE</span>
+            </div>
+            <div class="gd-version-date">January 10, 2026</div>
+        </div>
+
+        <h3>🏛️ Original Base Version</h3>
+        <p>The foundation upon which all future versions were built.</p>
+
+        <div class="gd-feature-category">
+            <h4>Core Features</h4>
+            <ul>
+                <li>Claude API integration (Anthropic)</li>
+                <li>Tavily search integration</li>
+                <li>Pinecone vector database support</li>
+                <li>Knowledge base integration</li>
+                <li>Customizable chatbot interface</li>
+                <li>Multiple themes</li>
+                <li>WordPress shortcode support</li>
+                <li>Conversation logging</li>
+                <li>Streaming response support</li>
+            </ul>
+        </div>
+
+        <div class="gd-feature-category">
+            <h4>Knowledge Base</h4>
+            <ul>
+                <li>Comprehensive Grateful Dead context</li>
+                <li>Setlist data (CSV format, 1965-1995)</li>
+                <li>Song catalog with disambiguation</li>
+                <li>Equipment specifications</li>
+                <li>Interview transcripts</li>
+                <li>Historical documentation</li>
+            </ul>
+        </div>
+
+        <p><strong>Package Size:</strong> 255KB | <strong>Files:</strong> 90</p>
+    </div>
+
+    <h2>📊 Version Comparison</h2>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 30px 0; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <thead>
+            <tr style="background: #3b82f6; color: white;">
+                <th style="padding: 15px; text-align: left;">Version</th>
+                <th style="padding: 15px; text-align: left;">Date</th>
+                <th style="padding: 15px; text-align: left;">Type</th>
+                <th style="padding: 15px; text-align: left;">Key Feature</th>
+                <th style="padding: 15px; text-align: right;">Size</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="background: #f0fdf4;">
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>v2.2.0</strong></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Feb 12, 2026</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><span class="gd-badge gd-badge-major">MAJOR</span></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Music Streaming</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">398KB</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>v2.0.8</strong></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Feb 11, 2026</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><span class="gd-badge gd-badge-major">MAJOR</span></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Token Optimization</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">344KB</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>v2.0.7</strong></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Feb 9, 2026</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><span class="gd-badge gd-badge-minor">MINOR</span></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Context Reorganization</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">346KB</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>v2.0.0</strong></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Jan 12, 2026</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><span class="gd-badge gd-badge-major">MAJOR</span></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Rebranding</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">256KB</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>v1.7.1</strong></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Jan 10, 2026</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><span class="gd-badge gd-badge-minor">STABLE</span></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Original Base</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">255KB</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>🎯 Feature Evolution</h2>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 30px 0; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <thead>
+            <tr style="background: #3b82f6; color: white;">
+                <th style="padding: 15px; text-align: left;">Feature</th>
+                <th style="padding: 15px; text-align: center;">v1.7.1</th>
+                <th style="padding: 15px; text-align: center;">v2.0.0</th>
+                <th style="padding: 15px; text-align: center;">v2.0.7</th>
+                <th style="padding: 15px; text-align: center;">v2.0.8</th>
+                <th style="padding: 15px; text-align: center;">v2.2.0</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Claude API</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Tavily Search</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Pinecone Vector DB</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Organized Context</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Token Optimization</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">✓</td>
+            </tr>
+            <tr style="background: #f0fdf4;">
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>Music Streaming</strong></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;"><strong>✓</strong></td>
+            </tr>
+            <tr style="background: #f0fdf4;">
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>Archive.org Integration</strong></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;"><strong>✓</strong></td>
+            </tr>
+            <tr style="background: #f0fdf4;">
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>Streaming Services</strong></td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">—</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;"><strong>✓</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>🔮 Roadmap</h2>
+
+    <div class="gd-info-box">
+        <h3 style="margin-top: 0;">Planned Features (Phase 5)</h3>
+        <ul>
+            <li><strong>User Features:</strong> Favorite performances, create playlists, listening history, recommendations</li>
+            <li><strong>Admin Features:</strong> API usage dashboard, rate limit monitoring, user analytics</li>
+            <li><strong>Technical:</strong> WebSocket updates, Spotify Web Playback SDK, offline caching, PWA features</li>
+            <li><strong>Expansion:</strong> More streaming services, additional music sources, enhanced search</li>
+        </ul>
+    </div>
+
+    <hr style="margin: 40px 0; border: none; border-top: 2px solid #e5e7eb;">
+
+    <p style="text-align: center; color: #6b7280; font-size: 0.9em;">
+        <strong>GD Chatbot</strong> | Continuous improvement since January 2026 | 
+        <a href="https://it-influentials.com" target="_blank">IT Influentials</a>
+    </p>
+</div>

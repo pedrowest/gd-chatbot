@@ -86,13 +86,17 @@ cp "$PLUGIN_DIR/CHANGELOG.md" "$BUILD_PLUGIN_DIR/" 2>/dev/null || true
 # Admin directory
 mkdir -p "$BUILD_PLUGIN_DIR/admin/css"
 mkdir -p "$BUILD_PLUGIN_DIR/admin/js"
+mkdir -p "$BUILD_PLUGIN_DIR/admin/partials"
 cp "$PLUGIN_DIR/admin/class-admin-settings.php" "$BUILD_PLUGIN_DIR/admin/"
 cp "$PLUGIN_DIR/admin/css/"*.css "$BUILD_PLUGIN_DIR/admin/css/" 2>/dev/null || true
 cp "$PLUGIN_DIR/admin/js/"*.js "$BUILD_PLUGIN_DIR/admin/js/" 2>/dev/null || true
+cp "$PLUGIN_DIR/admin/partials/"*.php "$BUILD_PLUGIN_DIR/admin/partials/" 2>/dev/null || true
 
 # Includes directory
 mkdir -p "$BUILD_PLUGIN_DIR/includes"
+mkdir -p "$BUILD_PLUGIN_DIR/includes/oauth"
 cp "$PLUGIN_DIR/includes/"*.php "$BUILD_PLUGIN_DIR/includes/"
+cp "$PLUGIN_DIR/includes/oauth/"*.php "$BUILD_PLUGIN_DIR/includes/oauth/" 2>/dev/null || true
 
 # Public directory
 mkdir -p "$BUILD_PLUGIN_DIR/public/css"

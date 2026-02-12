@@ -142,6 +142,13 @@ class GD_Chat_Handler {
                 $full_response = $data['full_text'];
             }
             
+            // Enrich response with song links when complete
+            if ($data['type'] === 'done' && !empty($data['full_text'])) {
+                $enricher = new GD_Response_Enricher();
+                $data['full_text'] = $enricher->enrich($data['full_text']);
+                $full_response = $data['full_text'];
+            }
+            
             if ($callback) {
                 call_user_func($callback, $data);
             }
@@ -267,6 +274,10 @@ class GD_Chat_Handler {
         if (is_wp_error($response)) {
             return $response;
         }
+        
+        // 4.5. Enrich response with song links
+        $enricher = new GD_Response_Enricher();
+        $response['message'] = $enricher->enrich($response['message']);
         
         // 5. Log conversation
         $this->log_conversation($session_id, $message, $response['message'], $sources);

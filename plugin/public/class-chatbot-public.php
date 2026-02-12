@@ -52,6 +52,14 @@ class GD_Chatbot_Public {
             GD_CHATBOT_VERSION
         );
         
+        // Song Modal Styles
+        wp_enqueue_style(
+            'gd-chatbot-song-modal',
+            GD_CHATBOT_PLUGIN_URL . 'public/css/song-modal.css',
+            array('gd-chatbot-public'),
+            GD_CHATBOT_VERSION
+        );
+        
         // Optional: Professional Theme (inspired by dead.net)
         // Uncomment to use the professional theme instead
         // wp_enqueue_style(
@@ -69,6 +77,22 @@ class GD_Chatbot_Public {
             true
         );
         
+        // Song Modal Script
+        wp_enqueue_script(
+            'gd-chatbot-song-modal',
+            GD_CHATBOT_PLUGIN_URL . 'public/js/song-modal.js',
+            array('jquery', 'gd-chatbot-public'),
+            GD_CHATBOT_VERSION,
+            true
+        );
+        
+        // Pass data to song modal script
+        wp_localize_script('gd-chatbot-song-modal', 'gdChatbotPublic', array(
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('gd_chatbot_nonce'),
+            'isLoggedIn' => is_user_logged_in()
+        ));
+        
         // Marked.js for Markdown rendering
         wp_enqueue_script(
             'marked-js',
@@ -82,6 +106,7 @@ class GD_Chatbot_Public {
         wp_localize_script('gd-chatbot-public', 'gdChatbot', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('gd_chatbot_nonce'),
+            'isLoggedIn' => is_user_logged_in(),
             'settings' => array(
                 'title' => get_option('gd_chatbot_v2_chatbot_title', '🌹 Grateful Dead Guide ⚡'),
                 'welcomeMessage' => get_option('gd_chatbot_v2_chatbot_welcome_message', '🎸 Hey there, Deadhead! Ready to explore the music, shows, and culture of the Grateful Dead? Ask me anything!'),
