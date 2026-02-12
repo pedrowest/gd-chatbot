@@ -3,7 +3,7 @@
  * Plugin Name: GD Chatbot v2
  * Plugin URI: https://it-influentials.com
  * Description: AI-powered chatbot using Anthropic's Claude with Tavily web search and Pinecone vector database support.
- * Version: 2.0.7
+ * Version: 2.0.8
  * Author: IT Influentials
  * Author URI: https://it-influentials.com
  * License: GPL-2.0+
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('GD_CHATBOT_VERSION', '2.0.7');
+define('GD_CHATBOT_VERSION', '2.0.8');
 define('GD_CHATBOT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('GD_CHATBOT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('GD_CHATBOT_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -55,6 +55,13 @@ class GD_Chatbot {
      * Load required files
      */
     private function load_dependencies() {
+        // Token management classes (load before chat handler)
+        require_once GD_CHATBOT_PLUGIN_DIR . 'includes/class-token-estimator.php';
+        require_once GD_CHATBOT_PLUGIN_DIR . 'includes/class-context-cache.php';
+        require_once GD_CHATBOT_PLUGIN_DIR . 'includes/class-token-budget-manager.php';
+        require_once GD_CHATBOT_PLUGIN_DIR . 'includes/class-query-optimizer.php';
+        require_once GD_CHATBOT_PLUGIN_DIR . 'includes/class-context-builder.php';
+
         // Core classes
         require_once GD_CHATBOT_PLUGIN_DIR . 'includes/class-claude-api.php';
         require_once GD_CHATBOT_PLUGIN_DIR . 'includes/class-tavily-api.php';
@@ -96,6 +103,12 @@ class GD_Chatbot {
         add_action('wp_ajax_gd_test_claude_connection', array($this, 'test_claude_connection'));
         add_action('wp_ajax_gd_test_tavily_connection', array($this, 'test_tavily_connection'));
         add_action('wp_ajax_gd_test_pinecone_connection', array($this, 'test_pinecone_connection'));
+
+        // Token management AJAX
+        add_action('wp_ajax_gd_chatbot_clear_context_cache', array($this, 'handle_clear_context_cache'));
+
+        // Refresh models AJAX
+        add_action('wp_ajax_gd_chatbot_refresh_models', array($this, 'handle_refresh_models'));
     }
     
     /**
@@ -138,7 +151,7 @@ class GD_Chatbot {
             'pinecone_top_k' => 5,
             
             // Knowledgebase Loader settings
-            'kb_enabled' => true,
+            'kb_enabled' => false,
             'kb_max_results' => 10,
             'kb_min_score' => 0.35,
             
@@ -147,6 +160,11 @@ class GD_Chatbot {
             'aipower_max_results' => 10,
             'aipower_min_score' => 0.35,
             
+            // Token optimization settings
+            'token_optimization_enabled' => false,
+            'token_budget' => 500,
+            'token_cache_ttl' => 3600,
+
             // Appearance settings
             'chatbot_title' => '🌹 Grateful Dead Guide ⚡',
             'chatbot_welcome_message' => '🎸 Hey there, Deadhead! Ready to explore the music, shows, and culture of the Grateful Dead? Ask me anything!',
@@ -371,6 +389,64 @@ class GD_Chatbot {
         wp_send_json_success(array('message' => 'Connection successful!'));
     }
     
+    /**
+     * Handle clearing the context cache via AJAX
+     */
+    public function handle_clear_context_cache() {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+        }
+
+        check_ajax_referer('gd_chatbot_admin_nonce', 'nonce');
+
+        $cache = new GD_Context_Cache();
+        $cache->clear();
+
+        wp_send_json_success(array('message' => 'Context cache cleared successfully.'));
+    }
+
+    /**
+     * Handle AJAX request to refresh available models from the Anthropic API.
+     */
+    public function handle_refresh_models() {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+        }
+
+        check_ajax_referer('gd_chatbot_admin_nonce', 'nonce');
+
+        $api_key = isset($_POST['api_key']) ? sanitize_text_field($_POST['api_key']) : '';
+
+        if (empty($api_key)) {
+            wp_send_json_error(array('message' => 'API key is required'));
+        }
+
+        $claude = new GD_Claude_API($api_key);
+        $models = $claude->list_models($api_key);
+
+        if (is_wp_error($models)) {
+            wp_send_json_error(array('message' => $models->get_error_message()));
+        }
+
+        // Filter to claude models only and format for the dropdown
+        $formatted = array();
+        foreach ($models as $model) {
+            if (!isset($model['id']) || strpos($model['id'], 'claude') === false) {
+                continue;
+            }
+            $formatted[] = array(
+                'id'           => $model['id'],
+                'display_name' => isset($model['display_name']) ? $model['display_name'] : $model['id'],
+                'created_at'   => isset($model['created_at']) ? $model['created_at'] : '',
+            );
+        }
+
+        wp_send_json_success(array(
+            'models' => $formatted,
+            'count'  => count($formatted),
+        ));
+    }
+
     /**
      * Get default system prompt
      */

@@ -15,14 +15,15 @@
 7. [Pinecone Vector Database](#pinecone-vector-database)
 8. [Content Sanitization & Filtering](#content-sanitization--filtering)
 9. [System Prompt Guardrails](#system-prompt-guardrails)
-10. [Verification & Quality Control](#verification--quality-control)
-11. [How It All Works Together](#how-it-all-works-together)
+10. [Token Optimization System](#token-optimization-system)
+11. [Verification & Quality Control](#verification--quality-control)
+12. [How It All Works Together](#how-it-all-works-together)
 
 ---
 
 ## Overview
 
-The GD Claude Chatbot employs a **seven-layer accuracy system** to ensure users receive the most accurate, reliable, and comprehensive information about the Grateful Dead. Each layer serves a specific purpose and works in concert with the others to prevent misinformation, resolve ambiguities, and provide verified facts.
+The GD Claude Chatbot employs an **eight-layer accuracy system** to ensure users receive the most accurate, reliable, and comprehensive information about the Grateful Dead. Each layer serves a specific purpose and works in concert with the others to prevent misinformation, resolve ambiguities, and provide verified facts.
 
 ### Core Principle
 
@@ -39,15 +40,17 @@ User Question
      ↓
 [2] Content Sanitization ────→ Filter incorrect data
      ↓
-[3] Knowledge Base ──────────→ Core GD information (50KB+)
+[3] Knowledge Base ──────────→ 8 core topic files (60KB+)
      ↓
-[4] Context Files ───────────→ Specialized detailed data
+[4] Context Files ───────────→ Specialized detailed data (~55 files)
      ↓
 [5] Pinecone Vector DB ──────→ Semantic search (optional)
      ↓
 [6] Tavily Web Search ───────→ Current information (always on)
      ↓
-[7] System Prompt Guardrails → Enforce accuracy rules
+[7] Token Optimization ──────→ Intent-based context budgeting (optional)
+     ↓
+[8] System Prompt Guardrails → Enforce accuracy rules
      ↓
 Claude AI Processing
      ↓
@@ -58,82 +61,71 @@ Verified Response
 
 ## Knowledge Base System
 
-### Primary Knowledge Source: `grateful-dead-context.md`
+### Core Knowledge: 8 Topic Files in `context/core/`
 
-**Size**: ~50KB (~12,500 tokens)  
-**Scope**: Comprehensive Grateful Dead information  
-**Load Method**: Automatically appended to system prompt on initialization
+**Previous**: Single monolithic `grateful-dead-context.md` (63KB, 1,655 lines)
+**Current**: 8 focused topic files loaded via `glob('context/core/*.md')` and sorted alphabetically
 
-### Contents Include:
+**Load Method**: In full-context mode, all 8 files are concatenated with `---` separators and appended to the system prompt. In optimized mode, only condensed guardrails are loaded into the system prompt — detailed context is built per-query by `GD_Context_Builder`.
 
-#### 1. **Band Overview & History**
-- Formation and evolution (1965-1995)
-- Key events and milestones
-- Era transitions and lineup changes
+### Core Topic Files
 
-#### 2. **Band Members & Personnel**
-- Core members: Jerry Garcia, Bob Weir, Phil Lesh, Bill Kreutzmann, Mickey Hart
-- Keyboardists: Pigpen, Keith Godchaux, Donna Jean Godchaux, Brent Mydland, Vince Welnick
-- Extended family: crew, managers, archivists
+| File | Content | Approx Size |
+|------|---------|-------------|
+| `core/band-and-history.md` | Formation, evolution, members, eras, lineup changes | ~12KB |
+| `core/books-and-literature.md` | Essential Grateful Dead bibliography | ~9KB |
+| `core/culture-and-community.md` | Deadhead culture, post-Dead projects, philosophy | ~10KB |
+| `core/equipment.md` | Guitars, basses, drums, Wall of Sound, amplification | ~6KB |
+| `core/galleries-and-art.md` | Art galleries, museums, poster dealers | ~3KB |
+| `core/music-and-recordings.md` | Song catalog, discography, taping culture | ~7KB |
+| `core/resources-and-media.md` | History resources, online communities, people, URLs | ~12KB |
+| `core/terminology.md` | 125+ disambiguated terms (loaded first alphabetically) | ~8KB |
 
-#### 3. **Musical Catalog**
-- 605 songs with composer information
-- Song histories and evolution
-- Performance statistics
+### Why 8 Files Instead of 1
 
-#### 4. **Discography**
-- Studio albums (1967-1989)
-- Live releases (official series)
-- Compilation albums
+The monolithic file mixed terminology, biography, equipment, culture, galleries, books, and URLs — making it difficult for the AI to prioritize what's relevant. Splitting by topic:
 
-#### 5. **Equipment & Gear**
-- Jerry Garcia's guitars (Tiger, Wolf, Rosebud, Alligator)
-- Phil Lesh's custom basses
-- Wall of Sound system
-- Amplification and effects
+- **Better AI focus**: Topic-based files let the AI identify relevant sections faster
+- **Terminology loaded first**: Alphabetical sorting means `band-and-history.md` comes before other topics, and `terminology.md` provides disambiguation context early
+- **Easier maintenance**: Individual topics can be updated without touching unrelated content
+- **Self-maintaining code**: `glob('context/core/*.md')` automatically picks up new files
 
-#### 6. **Venues & Locations**
-- Historic venues (Fillmore, Winterland, Capitol Theatre)
-- Geographic touring patterns
-- Venue-specific information
+### Loading Behavior
 
-#### 7. **Cultural Context**
-- Deadhead community and culture
-- Tape trading tradition
-- Ticket distribution (miracle tickets)
-- Parking lot scene
+**Full-Context Mode** (token optimization OFF):
+- All 8 core files loaded, concatenated into system prompt
+- Supplementary files loaded via `glob('context/supplementary/*.md')`
+- Disambiguation guides loaded from `context/disambiguation/`
+- Bahr Gallery sanitization and injection still applies
 
-#### 8. **Post-Grateful Dead Projects**
-- Dead & Company
-- Phil Lesh & Friends
-- RatDog
-- Other Ones
-- Furthur
-
-#### 9. **Resources & Archives**
-- Internet Archive (archive.org)
-- UC Santa Cruz Grateful Dead Archive
-- Online resources (Relisten, Dead.net)
-- Books and documentaries
-
-### Automatic Loading
-
-The knowledge base is loaded **once per Claude API instance** and appended to the system prompt, ensuring:
-- ✅ Consistent baseline knowledge
-- ✅ No per-message loading overhead
-- ✅ Always available context
-- ✅ ~6.25% of Claude's 200K token context window
+**Optimized Mode** (token optimization ON):
+- Only condensed guardrails in system prompt (~200 tokens)
+- Per-query context built by `GD_Context_Builder` using `GD_Query_Optimizer` intent detection
+- Token budget enforced by `GD_Token_Budget_Manager` (default 500 tokens)
+- Cached fragments served from `GD_Context_Cache` (WordPress Transients)
 
 ---
 
 ## Context Files Integration
 
+### Directory Structure (Reorganized February 2026)
+
+```
+context/
+├── core/                    # 8 topic files (split from monolith)
+├── disambiguation/          # 3 guides (song titles, duplicates, equipment)
+├── reference/               # 3 CSV files (songs, equipment, domains)
+├── supplementary/           # 21 files (interviews, gear, research, etc.)
+├── setlists/                # 31 CSV files (1965-1995, one per year)
+└── _archive/                # Dev/planning files (not loaded by code)
+```
+
 ### Specialized Data Files
 
-Beyond the main knowledge base, the chatbot integrates **16 specialized context files** for deep-dive accuracy:
+Beyond the 8 core topic files, the chatbot integrates **~55 specialized context files** across 5 subdirectories for deep-dive accuracy:
 
 #### 1. **Setlist Database** (2,388 Shows)
-**Files**: `context/Deadshows/deadshows/*.csv` (31 files, 1965-1995)
+**Files**: `context/setlists/*.csv` (31 files, 1965-1995)
 
 **Contents**:
 - Complete setlists for every show
@@ -151,7 +143,7 @@ Beyond the main knowledge base, the chatbot integrates **16 specialized context 
 **Accuracy Benefit**: Eliminates hallucination about show dates, setlists, and venues
 
 #### 2. **Song Database**
-**File**: `context/grateful_dead_songs.csv` (605 songs)
+**File**: `context/reference/songs.csv` (605 songs)
 
 **Contents**:
 - Song titles
@@ -163,7 +155,7 @@ Beyond the main knowledge base, the chatbot integrates **16 specialized context 
 **Accuracy Benefit**: Precise songwriter attribution and song history
 
 #### 3. **Equipment Database**
-**File**: `context/grateful_dead_equipment.csv`
+**File**: `context/reference/equipment.csv`
 
 **Contents**:
 - Instrument specifications
@@ -174,10 +166,10 @@ Beyond the main knowledge base, the chatbot integrates **16 specialized context 
 **Accuracy Benefit**: Accurate gear information (prevents "Jerry played a Les Paul" errors)
 
 #### 4. **Interview Archives**
-**Files**: 
-- `context/grateful_dead_interviews.md`
-- `context/grateful_dead_interview_transcripts_complete.md`
-- `context/jerrybase.com_interviews_18.md`
+**Files**:
+- `context/supplementary/interviews.md`
+- `context/supplementary/transcripts.md`
+- `context/supplementary/jerrybase-interviews.md`
 
 **Contents**:
 - Direct quotes from band members
@@ -188,8 +180,8 @@ Beyond the main knowledge base, the chatbot integrates **16 specialized context 
 
 #### 5. **UC Santa Cruz Archive Holdings**
 **Files**:
-- `context/UC Santa Cruz Grateful Dead Archive: Comprehensive Summary of Holdings.md`
-- `context/ucsc_gd_archive_notes.md`
+- `context/supplementary/ucsc-archive.md`
+- `context/supplementary/ucsc-notes.md`
 
 **Contents**:
 - Official archive documentation
@@ -200,9 +192,10 @@ Beyond the main knowledge base, the chatbot integrates **16 specialized context 
 
 #### 6. **Composition Databases**
 **Files**:
-- `context/www.deaddisc.com_GDFD_RHSongs.htm.md` (Robert Hunter songs)
-- `context/www.deaddisc.com_GDFD_JPBCompositions.htm.md` (John Perry Barlow songs)
-- `context/www.deaddisc.com_GDFD_Songs_Perf.htm.md` (Performance data)
+
+- `context/supplementary/rh-songs.md` (Robert Hunter songs)
+- `context/supplementary/jpb-compositions.md` (John Perry Barlow songs)
+- `context/supplementary/songs-performances.md` (Performance data)
 
 **Contents**:
 - Complete songwriter catalogs
@@ -212,7 +205,7 @@ Beyond the main knowledge base, the chatbot integrates **16 specialized context 
 **Accuracy Benefit**: Precise creative credit attribution
 
 #### 7. **The Bahr Gallery** (Dedicated File)
-**File**: `context/the_bahr_gallery.md`
+**File**: `context/supplementary/bahr-gallery.md`
 
 **Special Handling**:
 - **Exclusive source** for Bahr Gallery information
@@ -223,7 +216,7 @@ Beyond the main knowledge base, the chatbot integrates **16 specialized context 
 **Accuracy Benefit**: Prevents location confusion (eliminates San Francisco/Chicago errors)
 
 #### 8. **Gallery & Museum Guide**
-**File**: `context/A Guide to Regional Music and Rock Art Galleries.md`
+**File**: `context/supplementary/regional-galleries.md`
 
 **Contents**:
 - Regional gallery listings
@@ -234,7 +227,7 @@ Beyond the main knowledge base, the chatbot integrates **16 specialized context 
 **Accuracy Benefit**: Accurate venue and gallery locations
 
 #### 9. **Grateful Dead Papers Findings**
-**File**: `context/grateful_dead_papers_findings.md`
+**File**: `context/supplementary/research-findings.md`
 
 **Contents**:
 - Academic research findings
@@ -613,7 +606,7 @@ private function sanitize_bahr_gallery_references($content) {
 
 ```php
 private function inject_bahr_gallery_content($context) {
-    $bahr_file = GD_CHATBOT_PLUGIN_DIR . 'context/the_bahr_gallery.md';
+    $bahr_file = GD_CHATBOT_PLUGIN_DIR . 'context/supplementary/bahr-gallery.md';
     $bahr_content = file_get_contents($bahr_file);
     
     // Inject authoritative content
@@ -623,7 +616,7 @@ private function inject_bahr_gallery_content($context) {
 }
 ```
 
-**Result**: Only correct information from `the_bahr_gallery.md` is included
+**Result**: Only correct information from `supplementary/bahr-gallery.md` is included
 
 #### Layer 3: System Prompt Override
 
@@ -737,6 +730,109 @@ CONFIDENCE GUIDELINES:
 
 ---
 
+## Token Optimization System
+
+### Purpose: Efficient Context Without Sacrificing Accuracy
+
+**Status**: Optional (enabled via admin settings toggle "Enable Token Optimization")
+
+The token optimization system reduces API costs by building minimal, intent-specific context per query instead of loading the full 60KB+ knowledge base into every request. Five PHP classes work together to enforce token budgets while maintaining accuracy.
+
+### Architecture
+
+```
+User Query
+     ↓
+GD_Query_Optimizer ─────→ Detect intent (setlist, song, equipment, etc.)
+     ↓                    Determine required sources
+GD_Token_Budget_Manager → Enforce hard token limit (default: 500)
+     ↓                    Prioritize fragments (CRITICAL > HIGH > MEDIUM > LOW)
+GD_Context_Builder ─────→ Build per-query context from required sources
+     ↓                    Truncate fragments to fit budget
+GD_Context_Cache ───────→ Cache built context (WordPress Transients)
+     ↓                    15-minute TTL, per-query cache key
+GD_Token_Estimator ─────→ Estimate token counts (~0.75 tokens/char)
+                          Truncate strings to token limits
+```
+
+### The Five Classes
+
+#### 1. `GD_Query_Optimizer` ([class-query-optimizer.php](plugin/includes/class-query-optimizer.php))
+
+- Detects user intent from 9 categories: `setlist`, `song`, `equipment`, `band_member`, `venue`, `tour`, `trivia`, `era`, `general`
+- Maps each intent to required data sources (setlist DB, song guide, equipment, band info, venues, knowledge base)
+- Determines if web search or knowledge base lookup is needed
+
+#### 2. `GD_Token_Budget_Manager` ([class-token-budget-manager.php](plugin/includes/class-token-budget-manager.php))
+
+- Enforces a hard token ceiling (configurable, default 500 tokens)
+- Accepts labeled fragments with priority levels: `CRITICAL` (90), `HIGH` (70), `MEDIUM` (50), `LOW` (30)
+- Builds final context by including fragments in priority order until budget is exhausted
+- Truncates the lowest-priority fragment if it would exceed the remaining budget
+
+#### 3. `GD_Context_Builder` ([class-context-builder.php](plugin/includes/class-context-builder.php))
+
+- Orchestrates the entire context-building pipeline
+- Builds a condensed base context (~200 tokens) with accuracy guardrails
+- Adds source-specific context: setlist data, song guide, equipment, band info, venues
+- Integrates Pinecone knowledge base results and Tavily web search results when available
+- Returns context, debug info, detected intent, and sources used
+
+#### 4. `GD_Context_Cache` ([class-context-cache.php](plugin/includes/class-context-cache.php))
+
+- Caches built context fragments using WordPress Transients API
+- 15-minute TTL for dynamic content, 24 hours for static content (base context, equipment, band info)
+- Cache key based on query hash for per-query deduplication
+
+#### 5. `GD_Token_Estimator` ([class-token-estimator.php](plugin/includes/class-token-estimator.php))
+
+- Estimates token count using ~0.75 tokens per character heuristic
+- Provides `truncate($text, $max_tokens)` for cutting text to token limits
+- Used throughout the pipeline to enforce per-fragment and total budgets
+
+### Two Operating Modes
+
+| Aspect | Full-Context Mode | Optimized Mode |
+|--------|-------------------|----------------|
+| **Setting** | Token optimization OFF | Token optimization ON |
+| **System prompt** | All 8 core files + supplementary + disambiguation + guardrails | Condensed guardrails only (~200 tokens) |
+| **Per-query context** | Same context for every query | Intent-specific context built per query |
+| **Token usage** | ~12,500 tokens per request | ~500 tokens per request (configurable) |
+| **Accuracy** | Maximum — full knowledge base available | High — relevant sources selected by intent |
+| **Cost** | Higher API costs | ~96% reduction in context tokens |
+| **Best for** | Development, testing, low-volume | Production, high-volume, cost-sensitive |
+
+### Intent-to-Source Mapping
+
+| Intent | Primary Source | Secondary Sources |
+|--------|---------------|-------------------|
+| `setlist` | Setlist DB | Venues, Knowledge Base |
+| `song` | Song Guide | Setlist DB, Knowledge Base |
+| `equipment` | Equipment | Band Info |
+| `band_member` | Band Info | Knowledge Base |
+| `venue` | Venues | Setlist DB |
+| `tour` | Setlist DB | Venues |
+| `trivia` | Setlist DB | Knowledge Base |
+| `era` | Knowledge Base | Band Info |
+| `general` | Knowledge Base | Band Info, Song Guide |
+
+### Accuracy Safeguards in Optimized Mode
+
+Even with reduced context, accuracy is maintained through:
+
+- **Condensed guardrails** always present: Bahr Gallery location override, source concealment rules, accuracy-first instructions
+- **Intent detection** ensures the right data sources are consulted for each query type
+- **Pinecone and Tavily results** are still integrated when available and budget allows
+- **Priority system** ensures critical context (guardrails) is never dropped, while lower-priority sources are truncated or omitted
+
+### Configuration (Admin Settings)
+
+- **Enable Token Optimization**: Toggle on/off (default: off)
+- **Token Budget**: 100–2000 tokens (default: 500)
+- **Cache TTL**: Configurable via code (default: 15 minutes for dynamic, 24 hours for static)
+
+---
+
 ## Verification & Quality Control
 
 ### Multi-Source Cross-Verification
@@ -748,7 +844,7 @@ CONFIDENCE GUIDELINES:
 **Verification Process**:
 
 1. **Setlist Database** → Primary source for setlist
-   - File: `context/Deadshows/deadshows/1977.csv`
+   - File: `context/setlists/1977.csv`
    - Exact date match: 1977-05-08
    - Venue: Barton Hall, Cornell University, Ithaca, NY
 
@@ -841,7 +937,7 @@ CONFIDENCE GUIDELINES:
    - Recording quality notes
 
 5. CONTEXT FILES:
-   - Query: context/Deadshows/deadshows/1977.csv
+   - Query: context/setlists/1977.csv
    - Find: 1977-05-08, Barton Hall, Cornell
    - Extract: Complete setlist
 
@@ -913,17 +1009,18 @@ if (is_wp_error($tavily_results)) {
 
 ---
 
-## Summary: Seven Layers of Accuracy
+## Summary: Eight Layers of Accuracy
 
 | Layer | Purpose | Accuracy Contribution |
 |-------|---------|----------------------|
 | **1. Disambiguation** | Resolve ambiguous terms | Prevents misinterpretation |
 | **2. Content Sanitization** | Remove incorrect data | Eliminates bad information |
-| **3. Knowledge Base** | Core GD information | Comprehensive baseline |
-| **4. Context Files** | Specialized data | Deep-dive accuracy |
+| **3. Knowledge Base** | 8 core topic files | Focused, topic-specific baseline |
+| **4. Context Files** | ~55 specialized files | Deep-dive accuracy across 5 subdirectories |
 | **5. Pinecone** | Semantic search | Relevant document retrieval |
 | **6. Tavily** | Current information | Real-time verification |
-| **7. System Guardrails** | Enforce accuracy rules | Explicit error prevention |
+| **7. Token Optimization** | Intent-based budgeting | Cost-efficient context without accuracy loss |
+| **8. System Guardrails** | Enforce accuracy rules | Explicit error prevention |
 
 ### Combined Effect
 
@@ -944,8 +1041,10 @@ if (is_wp_error($tavily_results)) {
 
 ### Performance Optimization
 
-**Context Loading**: Once per instance (not per message)
-**Token Usage**: ~6.25% of context window for knowledge base
+**Full-Context Mode**: All 8 core files + supplementary loaded once per instance (~12,500 tokens)
+**Optimized Mode**: Per-query context built from intent detection (~500 tokens, configurable)
+**Token Savings**: ~96% reduction when token optimization is enabled
+**Caching**: WordPress Transients with 15-min TTL (dynamic) / 24-hour TTL (static)
 **Response Time**: < 2 seconds for most queries
 **Streaming**: Real-time progressive display
 
@@ -972,20 +1071,21 @@ Potential improvements:
 
 ## Conclusion
 
-The GD Claude Chatbot employs a **comprehensive, multi-layered accuracy system** that combines:
+The GD Claude Chatbot employs a **comprehensive, eight-layer accuracy system** that combines:
 
-- 📚 **50KB+ knowledge base** with automatic loading
-- 📁 **16 specialized context files** for deep accuracy
+- 📚 **60KB+ knowledge base** split into 8 focused topic files (`context/core/`)
+- 📁 **~55 specialized context files** across 5 subdirectories for deep accuracy
 - 🔤 **125+ disambiguated terms** preventing misinterpretation
 - 🌐 **Always-on Tavily search** for current information
 - 🔍 **Optional Pinecone** semantic search
 - 🧹 **Content sanitization** removing incorrect data
+- ⚡ **Token optimization** with intent-based context budgeting (optional)
 - 🛡️ **System prompt guardrails** enforcing accuracy rules
 
-**Result**: The most accurate, reliable, and comprehensive Grateful Dead chatbot available, with multiple verification layers ensuring users receive trustworthy information every time.
+**Result**: The most accurate, reliable, and comprehensive Grateful Dead chatbot available, with multiple verification layers ensuring users receive trustworthy information every time — now with optional token optimization that reduces context costs by ~96% without sacrificing accuracy.
 
 ---
 
-**Version**: 1.7.0  
-**Last Updated**: January 5, 2026  
+**Version**: 2.0.8
+**Last Updated**: February 11, 2026
 **Maintained By**: IT Influentials

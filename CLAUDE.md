@@ -41,11 +41,12 @@ gd-chatbot/                    # Project root
 │   │   └── js/chatbot.js
 │   │
 │   └── context/               # Knowledge base (deployed with plugin)
-│       ├── grateful-dead-context.md
-│       ├── grateful_dead_disambiguation_guide.md
-│       ├── grateful_dead_songs.csv
-│       ├── ... (other context files)
-│       └── Deadshows/deadshows/  # Setlist CSVs (1965-1995)
+│       ├── core/              # 8 topic files (split from monolith)
+│       ├── disambiguation/    # Song title & equipment disambiguation
+│       ├── reference/         # CSV data (songs, equipment, domains)
+│       ├── supplementary/     # Additional knowledge (interviews, gear, etc.)
+│       ├── setlists/          # Setlist CSVs (1965-1995)
+│       └── _archive/          # Dev/planning files (not loaded by code)
 │
 ├── docs/                      # ALL DOCUMENTATION (consolidated)
 │   ├── guides/                # User and developer guides
@@ -160,9 +161,12 @@ All PHP code uses `GD_CHATBOT_PLUGIN_DIR` and `GD_CHATBOT_PLUGIN_URL` constants,
 - Paths automatically resolve when the plugin is installed in WordPress
 
 ### Key File Paths in Code
-- Context files: `GD_CHATBOT_PLUGIN_DIR . 'context/'`
-- Setlist CSVs: `GD_CHATBOT_PLUGIN_DIR . 'context/Deadshows/deadshows/'`
-- Disambiguation: `GD_CHATBOT_PLUGIN_DIR . 'context/grateful_dead_disambiguation_guide.md'`
+- Core context: `GD_CHATBOT_PLUGIN_DIR . 'context/core/'` (glob *.md)
+- Supplementary: `GD_CHATBOT_PLUGIN_DIR . 'context/supplementary/'` (glob *.md)
+- Disambiguation: `GD_CHATBOT_PLUGIN_DIR . 'context/disambiguation/'`
+- Setlist CSVs: `GD_CHATBOT_PLUGIN_DIR . 'context/setlists/'`
+- Songs CSV: `GD_CHATBOT_PLUGIN_DIR . 'context/reference/songs.csv'`
+- Bahr Gallery: `GD_CHATBOT_PLUGIN_DIR . 'context/supplementary/bahr-gallery.md'`
 
 ## Usage Guidelines
 

@@ -73,6 +73,7 @@
         initTestConnections();
         initCopyShortcode();
         initModelSelector();
+        initRefreshModels();
     });
 
     /**
@@ -265,6 +266,106 @@
                     $maxTokens.val(suggestedMax);
                 }
             }
+        });
+    }
+
+    /**
+     * Refresh available models from the Anthropic API
+     */
+    function initRefreshModels() {
+        $('#refresh-models').on('click', function() {
+            var $button = $(this);
+            var $status = $('#refresh-models-status');
+            var $select = $('#claude_model');
+            var apiKey = $('#claude_api_key').val();
+
+            if (!apiKey) {
+                $status.removeClass('success loading').addClass('error').text('Enter an API key first');
+                setTimeout(function() { $status.removeClass('error').text(''); }, 3000);
+                return;
+            }
+
+            $button.prop('disabled', true);
+            $status.removeClass('success error').addClass('loading').text('Fetching models...');
+
+            $.post(gdChatbotAdmin.ajaxUrl, {
+                action: 'gd_chatbot_refresh_models',
+                nonce: gdChatbotAdmin.nonce,
+                api_key: apiKey
+            }, function(response) {
+                $button.prop('disabled', false);
+                $status.removeClass('loading');
+
+                if (!response.success) {
+                    $status.addClass('error').text('✗ ' + (response.data.message || 'Failed'));
+                    setTimeout(function() { $status.removeClass('error').text(''); }, 5000);
+                    return;
+                }
+
+                var models = response.data.models;
+                if (!models || models.length === 0) {
+                    $status.addClass('error').text('No models returned');
+                    setTimeout(function() { $status.removeClass('error').text(''); }, 5000);
+                    return;
+                }
+
+                // Remember current selection
+                var currentVal = $select.val();
+
+                // Clear and rebuild the dropdown
+                $select.empty();
+
+                // Group models by family
+                var groups = {};
+                $.each(models, function(i, m) {
+                    var family = 'Other';
+                    if (m.id.indexOf('claude-opus-4') === 0 || m.id.indexOf('claude-sonnet-4') === 0) {
+                        family = '🚀 Claude 4';
+                    } else if (m.id.indexOf('claude-3-5') === 0) {
+                        family = '⚡ Claude 3.5';
+                    } else if (m.id.indexOf('claude-3') === 0) {
+                        family = '📦 Claude 3';
+                    } else if (m.id.indexOf('claude-4') === 0) {
+                        family = '🚀 Claude 4';
+                    }
+
+                    if (!groups[family]) {
+                        groups[family] = [];
+                    }
+                    groups[family].push(m);
+                });
+
+                // Desired group order
+                var order = ['🚀 Claude 4', '⚡ Claude 3.5', '📦 Claude 3', 'Other'];
+                $.each(order, function(i, groupName) {
+                    if (!groups[groupName]) return;
+                    var $optgroup = $('<optgroup>').attr('label', groupName);
+                    $.each(groups[groupName], function(j, m) {
+                        var $opt = $('<option>').val(m.id).text(m.display_name);
+                        if (m.id === currentVal) {
+                            $opt.prop('selected', true);
+                        }
+                        $optgroup.append($opt);
+                    });
+                    $select.append($optgroup);
+                });
+
+                // If previous selection no longer exists, keep first option
+                if ($select.find('option[value="' + currentVal + '"]').length === 0) {
+                    $select.prop('selectedIndex', 0);
+                }
+
+                // Trigger change to update model info display
+                $select.trigger('change');
+
+                $status.addClass('success').text('✓ ' + response.data.count + ' models loaded');
+                setTimeout(function() { $status.removeClass('success').text(''); }, 5000);
+
+            }).fail(function() {
+                $button.prop('disabled', false);
+                $status.removeClass('loading').addClass('error').text('✗ Request failed');
+                setTimeout(function() { $status.removeClass('error').text(''); }, 5000);
+            });
         });
     }
 

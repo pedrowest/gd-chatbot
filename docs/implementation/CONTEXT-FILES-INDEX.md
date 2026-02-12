@@ -1,265 +1,143 @@
-# Context Files Index - GD Claude Chatbot
+# Context Files Index - GD Chatbot
 
 ## Overview
 
-The `/context` directory contains comprehensive reference materials about the Grateful Dead, totaling **4,274+ lines** of curated content. These files provide deep knowledge about the band's history, music, performances, and cultural impact.
+The `plugin/context/` directory contains the chatbot's complete knowledge base about the Grateful Dead, organized into 6 subdirectories with **72 files** total. This structure was reorganized in February 2026 from a flat directory with a single 63KB monolithic file into focused, topic-based files.
 
-## 📁 Directory Structure
+## Directory Structure
 
-### Primary Reference Documents
+```
+context/
+├── core/               8 topic files (split from monolith, loaded in full-context mode)
+├── disambiguation/     3 guides (loaded after core context)
+├── reference/          3 CSV files (structured data for programmatic lookup)
+├── supplementary/     21 files (loaded in full-context mode via glob)
+├── setlists/          31 CSV files (1965-1995, queried by GD_Setlist_Search)
+└── _archive/           6 files (dev/planning, not loaded by code)
+```
 
-#### **Grateful Dead Competencies** (438 lines)
-Core knowledge areas and expertise domains for understanding the Grateful Dead:
-- Musical evolution and style
-- Performance history and touring
-- Band member contributions
-- Cultural and historical context
-- Technical and production aspects
+## `core/` — Primary Knowledge Base (8 files)
 
-#### **Grateful Dead Context Requirements** (36 lines)
-Essential guidelines and requirements for providing accurate Grateful Dead information:
-- Accuracy standards
-- Source verification
-- Era-specific knowledge
-- Community respect protocols
+Loaded via `glob('context/core/*.md')` in alphabetical order, concatenated into the system prompt in full-context mode. In optimized mode, condensed summaries are built per-query instead.
 
-#### **Grateful Dead Books** (158 lines)
-Comprehensive bibliography of Grateful Dead literature:
-- Biographies and memoirs
-- Historical accounts
-- Photography books
-- Cultural analysis
-- Fan perspectives
+| File | Content | Loaded By |
+|------|---------|-----------|
+| `band-and-history.md` | Formation, evolution, members, eras, lineup changes | `load_full_context()` |
+| `books-and-literature.md` | Essential Grateful Dead bibliography | `load_full_context()` |
+| `culture-and-community.md` | Deadhead culture, post-Dead projects, philosophy | `load_full_context()` |
+| `equipment.md` | Guitars, basses, drums, Wall of Sound, amplification | `load_full_context()` |
+| `galleries-and-art.md` | Art galleries, museums, poster dealers | `load_full_context()` |
+| `music-and-recordings.md` | Song catalog, discography, taping culture | `load_full_context()` |
+| `resources-and-media.md` | History resources, online communities, people, URLs | `load_full_context()` |
+| `terminology.md` | 125+ disambiguated terms | `load_full_context()` |
 
-#### **Grateful Dead Scratch Pad** (83 lines)
-Working notes and quick reference materials:
-- Key dates and milestones
-- Notable quotes
-- Quick facts
-- Research notes
+**Source**: Split from `grateful-dead-context.md` (1,655 lines, 63KB). Original preserved in `_archive/grateful-dead-context-ORIGINAL.md`.
 
-### Interview Archives
+## `disambiguation/` — Disambiguation Guides (3 files)
 
-#### **grateful_dead_interview_transcripts_complete.md** (579 lines)
-Complete transcripts of interviews with band members:
-- Jerry Garcia interviews
-- Bob Weir interviews
-- Phil Lesh interviews
-- Mickey Hart interviews
-- Bill Kreutzmann interviews
-- Historical context for each interview
+Loaded by `load_disambiguation_guides()` in `class-claude-api.php` after core context.
 
-#### **grateful_dead_interviews.md** (520 lines)
-Additional interview materials and excerpts:
-- Magazine interviews
-- Radio interviews
-- Documentary interviews
-- Press conferences
+| File | Original Name | Content |
+|------|---------------|---------|
+| `song-titles.md` | `grateful_dead_disambiguation_guide.md` | Song title disambiguation |
+| `duplicate-titles.md` | `Grateful Dead Songs with Duplicate Titles - Summary List.md` | Songs sharing titles |
+| `equipment-names.md` | `Music-Equipment-Disambiguations.md` | Equipment name clarification |
 
-#### **jerrybase.com_interviews_18.md**
-Jerry Garcia-specific interview archive:
-- Career-spanning interviews
-- Musical philosophy
-- Creative process discussions
+## `reference/` — Structured Data (3 files)
 
-### Online Resources & Archives
+CSV files used for programmatic lookup by PHP classes.
 
-#### **A Comprehensive Guide to Grateful Dead Online Resources.md** (88 lines)
-Directory of online Grateful Dead resources:
-- Official websites
-- Fan communities
-- Archive sites
-- Streaming platforms
-- Research databases
+| File | Original Name | Used By |
+|------|---------------|---------|
+| `songs.csv` | `grateful_dead_songs.csv` | `GD_Context_Builder::build_song_guide_context()` |
+| `equipment.csv` | `grateful_dead_equipment.csv` | Context builder equipment lookups |
+| `tavily-domains.csv` | `tavily_trusted_domains.csv` | Tavily search domain filtering |
 
-#### **A Guide to Regional Music and Rock Art Galleries.md** (95 lines)
-Physical locations and galleries:
-- Museums with Grateful Dead exhibits
-- Rock and roll halls of fame
-- Regional music archives
-- Art galleries featuring Dead-related art
+**Note**: Two duplicate tavily domain files were deleted during reorganization (`tavily_trusted_domains_list.csv`, `tavily_trusted_domains_list.txt`).
 
-#### **Grateful Dead Chatbots and AI Tools.md** (88 lines)
-Modern AI and digital tools for Deadheads:
-- Chatbot implementations
-- AI-powered search tools
-- Digital archives
-- Interactive experiences
+## `supplementary/` — Extended Knowledge (21 files)
 
-### UC Santa Cruz Archive Materials
+Loaded via `glob('context/supplementary/*.md')` in `load_additional_knowledgebase_files()`. The `bahr-gallery.md` file is excluded from the glob and handled separately by `inject_bahr_gallery_content()`.
 
-#### **UC Santa Cruz Grateful Dead Archive: Comprehensive Summary of Holdings.md**
-Overview of the official Grateful Dead Archive:
-- Collection scope
-- Holdings categories
-- Access information
-- Research resources
+| File | Original Name | Content |
+|------|---------------|---------|
+| `academic-papers.md` | `Comprehensive List of...md` | Academic papers on the Dead |
+| `ai-chatbots.md` | `Grateful Dead Chatbots and AI Tools.md` | AI tools survey |
+| `bahr-gallery.md` | `the_bahr_gallery.md` | Bahr Gallery authoritative source (special handling) |
+| `dissertations.md` | `dissertations_theses_list.md` | Academic dissertations |
+| `equipment-detailed.md` | `Grateful Dead Equipment List.md` | Detailed equipment specs (was orphaned) |
+| `gd-theme.md` | `GD-THEME.md` | Chatbot theme documentation |
+| `gds-articles.md` | `gds_volume1_articles.md` | Grateful Dead Studies articles |
+| `interviews.md` | `grateful_dead_interviews.md` | Interview collection (was orphaned) |
+| `jerrybase-interviews.md` | `jerrybase.com_interviews_18.md` | Jerry Garcia interviews (was orphaned) |
+| `jerry-garcia-gear.md` | `jerry_garcia_equipment.md` | Jerry's equipment details (was orphaned) |
+| `jpb-compositions.md` | `www.deaddisc.com_GDFD_JPBCompositions.htm.md` | Barlow compositions (was orphaned) |
+| `online-resources.md` | `A Comprehensive Guide to...md` | Online resource directory |
+| `regional-galleries.md` | `A Guide to Regional Music and Rock Art Galleries.md` | Gallery guide |
+| `research-findings.md` | `grateful_dead_papers_findings.md` | Research analysis |
+| `reverb-gear-guide.md` | `reverb.com_news_the-gear-of-the-grateful-dead.md` | Reverb.com gear guide |
+| `rh-songs.md` | `www.deaddisc.com_GDFD_RHSongs.htm.md` | Robert Hunter songs (was orphaned) |
+| `songs-performances.md` | `www.deaddisc.com_GDFD_Songs_Perf.htm.md` | Performance statistics (was orphaned) |
+| `statistics.md` | Lines 1584-1655 from monolith | Reference data points and stats |
+| `transcripts.md` | `grateful_dead_interview_transcripts_complete.md` | Full transcripts (was orphaned) |
+| `ucsc-archive.md` | `UC Santa Cruz...md` | UCSC archive holdings |
+| `ucsc-notes.md` | `ucsc_gd_archive_notes.md` | UCSC archive research notes |
 
-#### **ucsc_gd_archive_notes.md**
-Detailed notes on archive materials:
-- Specific collections
-- Notable items
-- Research highlights
+**9 previously orphaned files** (marked above) are now automatically loaded via the `glob()` pattern.
 
-### Song & Performance Data
+## `setlists/` — Show Database (31 files)
 
-#### **grateful_dead_songs.csv**
-Comprehensive song database:
-- Song titles
-- Composers
-- First/last performance dates
-- Performance statistics
-- Song history
+CSV files queried by `GD_Setlist_Search` class. One file per year, 1965-1995.
 
-#### **www.deaddisc.com_GDFD_Songs_Perf.htm.md**
-Song performance statistics:
-- Performance counts
-- Date ranges
-- Venue information
+| Files | Content |
+|-------|---------|
+| `1965.csv` through `1995.csv` | Date, venue, location, setlist for every show |
 
-#### **www.deaddisc.com_GDFD_JPBCompositions.htm.md**
-John Perry Barlow compositions:
-- Lyric credits
-- Collaboration details
-- Song histories
+**Previous path**: `context/Deadshows/deadshows/` (double-nested). Flattened to `context/setlists/`.
 
-#### **www.deaddisc.com_GDFD_RHSongs.htm.md**
-Robert Hunter songs:
-- Complete lyric catalog
-- Composition details
-- Performance history
+**Total shows**: 2,388 documented performances.
 
-### Setlist Database
+## `_archive/` — Development Files (6 files)
 
-#### **Deadshows/** Directory
-Complete setlist archive (1965-1995):
-- **31 CSV files** (one per year)
-- Show dates and venues
-- Complete setlists
-- Special notes and annotations
-- Guest appearances
-- Equipment notes
+Not loaded by any code. Preserved for reference only.
 
-**Files included**:
-- `1965.csv` through `1995.csv`
-- `README.md` - Database documentation
-- `deadshows.zip` - Compressed archive
+| File | Original Name | Content |
+|------|---------------|---------|
+| `grateful-dead-context-ORIGINAL.md` | `grateful-dead-context.md` | Backup of monolith before splitting |
+| `context-refactor-v1.9.0.md` | `GRATEFUL-DEAD-CONTEXT-REFACTOR-v1.9.0.md` | Refactor planning notes |
+| `competencies.md` | `Grateful Dead Competencies` (no ext) | Knowledge area competencies |
+| `context-requirements.md` | `Grateful Dead Context Requirements` (no ext) | Context requirements doc |
+| `scratch-pad.md` | `Grateful Dead Scratch Pad` (no ext) | Working notes |
+| `books-list.md` | `Grateful Dead Books` (no ext) | Bibliography draft |
 
-**Total Shows**: 2,300+ documented performances
+## Content Statistics
 
-## 📊 Content Statistics
+| Directory | Files | Format | Loaded By |
+|-----------|-------|--------|-----------|
+| `core/` | 8 | Markdown | `load_full_context()` via glob |
+| `disambiguation/` | 3 | Markdown | `load_disambiguation_guides()` |
+| `reference/` | 3 | CSV | `GD_Context_Builder`, Tavily |
+| `supplementary/` | 21 | Markdown | `load_additional_knowledgebase_files()` via glob |
+| `setlists/` | 31 | CSV | `GD_Setlist_Search` |
+| `_archive/` | 6 | Markdown | Not loaded |
+| **Total** | **72** | | |
 
-| Category | Files | Approximate Lines |
-|----------|-------|-------------------|
-| Reference Documents | 4 | ~715 |
-| Interview Archives | 3 | ~1,099 |
-| Online Resources | 3 | ~271 |
-| Archive Materials | 2 | ~200+ |
-| Song Data | 4 | ~500+ |
-| Setlist Database | 32 CSV files | ~1,500+ |
-| **Total** | **48+ files** | **4,274+ lines** |
+## Code References
 
-## 🎯 Content Categories
-
-### Historical & Biographical
-- Band history and evolution
-- Member biographies
-- Era-specific information
-- Cultural context
-
-### Musical & Performance
-- Song catalog and statistics
-- Setlist database (1965-1995)
-- Performance history
-- Musical analysis
-
-### Archival & Research
-- UC Santa Cruz Archive
-- Interview transcripts
-- Primary source materials
-- Research resources
-
-### Community & Culture
-- Fan perspectives
-- Online communities
-- Modern tools and resources
-- Cultural impact
-
-### Reference & Bibliography
-- Book recommendations
-- Online resources
-- Physical archives
-- Research guides
-
-## 🔍 Usage in Chatbot
-
-These context files are used by the chatbot to:
-
-1. **Answer Historical Questions**: Band history, member info, era details
-2. **Provide Setlist Information**: Show dates, venues, songs performed
-3. **Song Details**: Composers, performance stats, history
-4. **Archive Research**: Direct users to relevant archives and resources
-5. **Cultural Context**: Understand and explain Dead culture and community
-6. **Accurate Citations**: Reference specific sources and materials
-
-## 📝 File Formats
-
-- **Markdown (.md)**: Documentation, guides, transcripts
-- **CSV (.csv)**: Structured data (songs, setlists)
-- **Plain Text**: Notes and reference materials
-
-## 🔄 Integration
-
-The chatbot integrates this content through:
-
-1. **Direct File Access**: Reads context files as needed
-2. **Setlist Search**: Queries CSV database for show information
-3. **Semantic Understanding**: Uses content to inform responses
-4. **Source Attribution**: Cites specific files when relevant
-
-## 📚 Key Resources
-
-### Most Referenced Files
-1. **Setlist Database** - For show-specific queries
-2. **Song Catalog** - For song information
-3. **Interview Transcripts** - For quotes and perspectives
-4. **Competencies** - For comprehensive knowledge
-5. **Online Resources** - For directing users to additional info
-
-### Primary Sources
-- UC Santa Cruz Archive materials
-- Official interview transcripts
-- Verified performance data
-- Published books and articles
-
-## 🎨 Content Quality
-
-All materials are:
-- ✅ Verified from reliable sources
-- ✅ Historically accurate
-- ✅ Properly attributed
-- ✅ Community-vetted
-- ✅ Regularly updated
-
-## 🔐 Usage Notes
-
-- **Accuracy First**: All information verified against primary sources
-- **Era Awareness**: Context-appropriate for different time periods
-- **Community Respect**: Honors Grateful Dead culture and ethos
-- **Source Attribution**: Credits original sources when citing
-- **Comprehensive Coverage**: Spans entire 30-year career (1965-1995)
-
-## 📖 Documentation
-
-For more information about specific files or content areas, see:
-- Individual file headers and documentation
-- README files in subdirectories
-- Source attribution within files
+| PHP File | Method | Context Path Used |
+|----------|--------|-------------------|
+| `class-claude-api.php` | `load_full_context()` | `context/core/*.md` |
+| `class-claude-api.php` | `load_disambiguation_guides()` | `context/disambiguation/*.md` |
+| `class-claude-api.php` | `inject_bahr_gallery_content()` | `context/supplementary/bahr-gallery.md` |
+| `class-claude-api.php` | `load_additional_knowledgebase_files()` | `context/supplementary/*.md` |
+| `class-context-builder.php` | `build_song_guide_context()` | `context/reference/songs.csv` |
+| `class-setlist-search.php` | Constructor | `context/setlists/` |
+| `scripts/build-release.sh` | Release packaging | All 5 production subdirectories |
 
 ---
 
-**Total Content**: 4,274+ lines across 48+ files  
-**Coverage**: 1965-1995 (30 years)  
-**Shows Documented**: 2,300+  
-**Songs Cataloged**: 500+  
-**Last Updated**: January 4, 2026
+**Total Files**: 72
+**Production Files**: 66 (excluding _archive/)
+**Time Span**: 1965-1995 (30 years)
+**Shows Documented**: 2,388
+**Last Updated**: February 11, 2026

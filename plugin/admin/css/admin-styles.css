@@ -78,7 +78,7 @@
 }
 
 /* Tab Content */
-.tab-content {
+.gd-chatbot-tab-content {
     background: #fff;
     border: 1px solid var(--iti-gray-200);
     border-top: none;

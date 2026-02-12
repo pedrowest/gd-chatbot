@@ -101,52 +101,38 @@ cp "$PLUGIN_DIR/public/class-chatbot-public.php" "$BUILD_PLUGIN_DIR/public/"
 cp "$PLUGIN_DIR/public/css/"*.css "$BUILD_PLUGIN_DIR/public/css/" 2>/dev/null || true
 cp "$PLUGIN_DIR/public/js/"*.js "$BUILD_PLUGIN_DIR/public/js/" 2>/dev/null || true
 
-# Context directory (essential knowledge base files)
-mkdir -p "$BUILD_PLUGIN_DIR/context"
+# Context directory (knowledge base organized in subdirectories)
+echo "Copying knowledge base..."
 
-# Core context files
-ESSENTIAL_CONTEXT=(
-    "grateful-dead-context.md"
-    "grateful_dead_disambiguation_guide.md"
-    "grateful_dead_songs.csv"
-    "grateful_dead_equipment.csv"
-    "grateful_dead_interviews.md"
-    "grateful_dead_interview_transcripts_complete.md"
-    "jerry_garcia_equipment.md"
-    "Grateful Dead Equipment List.md"
-    "Grateful Dead Songs with Duplicate Titles - Summary List.md"
-    "Music-Equipment-Disambiguations.md"
-    "the_bahr_gallery.md"
-    "A Comprehensive Guide to Grateful Dead Online Resources.md"
-    "A Guide to Regional Music and Rock Art Galleries.md"
-    "Comprehensive List of Grateful Dead Academic Research Papers with PDF Downloads.md"
-    "GD-THEME.md"
-    "Grateful Dead Chatbots and AI Tools.md"
-    "UC Santa Cruz Grateful Dead Archive: Comprehensive Summary of Holdings.md"
-    "dissertations_theses_list.md"
-    "gds_volume1_articles.md"
-    "grateful_dead_papers_findings.md"
-    "reverb.com_news_the-gear-of-the-grateful-dead.md"
-    "ucsc_gd_archive_notes.md"
-    "www.deaddisc.com_GDFD_Songs_Perf.htm.md"
-    "www.deaddisc.com_GDFD_RHSongs.htm.md"
-    "www.deaddisc.com_GDFD_JPBCompositions.htm.md"
-    "jerrybase.com_interviews_18.md"
-    "tavily_trusted_domains.csv"
-    "tavily_trusted_domains_list.csv"
-    "tavily_trusted_domains_list.txt"
-)
+# Copy core context files
+if [ -d "$PLUGIN_DIR/context/core" ]; then
+    mkdir -p "$BUILD_PLUGIN_DIR/context/core"
+    cp "$PLUGIN_DIR/context/core/"*.md "$BUILD_PLUGIN_DIR/context/core/" 2>/dev/null || true
+fi
 
-for file in "${ESSENTIAL_CONTEXT[@]}"; do
-    if [ -f "$PLUGIN_DIR/context/$file" ]; then
-        cp "$PLUGIN_DIR/context/$file" "$BUILD_PLUGIN_DIR/context/"
-    fi
-done
+# Copy disambiguation guides
+if [ -d "$PLUGIN_DIR/context/disambiguation" ]; then
+    mkdir -p "$BUILD_PLUGIN_DIR/context/disambiguation"
+    cp "$PLUGIN_DIR/context/disambiguation/"*.md "$BUILD_PLUGIN_DIR/context/disambiguation/" 2>/dev/null || true
+fi
 
-# Copy Deadshows setlist database
-if [ -d "$PLUGIN_DIR/context/Deadshows" ]; then
+# Copy reference data (CSV files)
+if [ -d "$PLUGIN_DIR/context/reference" ]; then
+    mkdir -p "$BUILD_PLUGIN_DIR/context/reference"
+    cp "$PLUGIN_DIR/context/reference/"*.csv "$BUILD_PLUGIN_DIR/context/reference/" 2>/dev/null || true
+fi
+
+# Copy supplementary knowledge base files
+if [ -d "$PLUGIN_DIR/context/supplementary" ]; then
+    mkdir -p "$BUILD_PLUGIN_DIR/context/supplementary"
+    cp "$PLUGIN_DIR/context/supplementary/"*.md "$BUILD_PLUGIN_DIR/context/supplementary/" 2>/dev/null || true
+fi
+
+# Copy setlist database (CSV files per year)
+if [ -d "$PLUGIN_DIR/context/setlists" ]; then
     echo "Copying setlist database..."
-    cp -r "$PLUGIN_DIR/context/Deadshows" "$BUILD_PLUGIN_DIR/context/"
+    mkdir -p "$BUILD_PLUGIN_DIR/context/setlists"
+    cp "$PLUGIN_DIR/context/setlists/"*.csv "$BUILD_PLUGIN_DIR/context/setlists/" 2>/dev/null || true
 fi
 
 # Remove any .DS_Store files

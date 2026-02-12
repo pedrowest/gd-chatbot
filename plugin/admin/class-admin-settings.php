@@ -148,6 +148,17 @@ class GD_Chatbot_Admin_Settings {
         foreach ($appearance_settings as $setting) {
             register_setting('gd_chatbot_appearance', self::OPTION_PREFIX . $setting);
         }
+
+        // Token Optimization Settings
+        $token_settings = array(
+            'token_optimization_enabled',
+            'token_budget',
+            'token_cache_ttl'
+        );
+
+        foreach ($token_settings as $setting) {
+            register_setting('gd_chatbot_token', self::OPTION_PREFIX . $setting);
+        }
     }
     
     /**
@@ -229,6 +240,7 @@ class GD_Chatbot_Admin_Settings {
         ?>
         <div class="wrap gd-chatbot-admin">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+            <p class="description" style="margin-top: -10px;">Version <?php echo esc_html(GD_CHATBOT_VERSION); ?> | PHP <?php echo PHP_VERSION; ?></p>
             
             <nav class="nav-tab-wrapper">
                 <a href="?page=<?php echo self::PAGE_SLUG; ?>&tab=claude" 
@@ -251,32 +263,44 @@ class GD_Chatbot_Admin_Settings {
                    class="nav-tab <?php echo $active_tab === 'appearance' ? 'nav-tab-active' : ''; ?>">
                     <span class="dashicons dashicons-admin-appearance"></span> Appearance
                 </a>
-                <a href="?page=<?php echo self::PAGE_SLUG; ?>&tab=shortcode" 
+                <a href="?page=<?php echo self::PAGE_SLUG; ?>&tab=token_optimization"
+                   class="nav-tab <?php echo $active_tab === 'token_optimization' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-performance"></span> Token Optimization
+                </a>
+                <a href="?page=<?php echo self::PAGE_SLUG; ?>&tab=shortcode"
                    class="nav-tab <?php echo $active_tab === 'shortcode' ? 'nav-tab-active' : ''; ?>">
                     <span class="dashicons dashicons-shortcode"></span> Shortcode
                 </a>
             </nav>
             
-            <div class="tab-content">
+            <div class="gd-chatbot-tab-content" style="display:block !important; visibility:visible !important; opacity:1 !important;">
                 <?php
-                switch ($active_tab) {
-                    case 'tavily':
-                        $this->render_tavily_settings();
-                        break;
-                    case 'pinecone':
-                        $this->render_pinecone_settings();
-                        break;
-                    case 'knowledgebase':
-                        $this->render_knowledgebase_settings();
-                        break;
-                    case 'appearance':
-                        $this->render_appearance_settings();
-                        break;
-                    case 'shortcode':
-                        $this->render_shortcode_info();
-                        break;
-                    default:
-                        $this->render_claude_settings();
+                try {
+                    switch ($active_tab) {
+                        case 'tavily':
+                            $this->render_tavily_settings();
+                            break;
+                        case 'pinecone':
+                            $this->render_pinecone_settings();
+                            break;
+                        case 'knowledgebase':
+                            $this->render_knowledgebase_settings();
+                            break;
+                        case 'appearance':
+                            $this->render_appearance_settings();
+                            break;
+                        case 'token_optimization':
+                            $this->render_token_optimization_settings();
+                            break;
+                        case 'shortcode':
+                            $this->render_shortcode_info();
+                            break;
+                        default:
+                            $this->render_claude_settings();
+                    }
+                } catch (\Throwable $e) {
+                    echo '<div class="notice notice-error" style="margin: 20px 0;"><p><strong>GD Chatbot Error:</strong> ' . esc_html($e->getMessage()) . '</p>';
+                    echo '<p><code>' . esc_html($e->getFile()) . ':' . esc_html($e->getLine()) . '</code></p></div>';
                 }
                 ?>
             </div>
@@ -355,6 +379,10 @@ class GD_Chatbot_Admin_Settings {
                                     </option>
                                 </optgroup>
                             </select>
+                            <button type="button" class="button" id="refresh-models">
+                                <span class="dashicons dashicons-update" style="vertical-align: middle; margin-top: -2px;"></span> Refresh Models
+                            </button>
+                            <span id="refresh-models-status" class="connection-status"></span>
                             <div id="model-info" class="model-info-box">
                                 <?php 
                                 $model_info = GD_Claude_API::get_model_info($current_model);
@@ -780,7 +808,7 @@ class GD_Chatbot_Admin_Settings {
                                 <input type="checkbox" 
                                        name="<?php echo self::OPTION_PREFIX; ?>kb_enabled" 
                                        value="1"
-                                       <?php checked(get_option(self::OPTION_PREFIX . 'kb_enabled', true), 1); ?>
+                                       <?php checked(get_option(self::OPTION_PREFIX . 'kb_enabled', false), 1); ?>
                                        <?php disabled(!$kb_ready); ?>>
                                 <span class="slider round"></span>
                             </label>
@@ -964,6 +992,165 @@ class GD_Chatbot_Admin_Settings {
         <?php
     }
     
+    /**
+     * Render Token Optimization settings tab
+     */
+    private function render_token_optimization_settings() {
+        $enabled = get_option(self::OPTION_PREFIX . 'token_optimization_enabled', false);
+        $budget = get_option(self::OPTION_PREFIX . 'token_budget', 500);
+        $cache_ttl = get_option(self::OPTION_PREFIX . 'token_cache_ttl', 3600);
+        ?>
+        <form method="post" action="options.php">
+            <?php settings_fields('gd_chatbot_token'); ?>
+
+            <div class="iti-settings-section">
+                <h2><span class="dashicons dashicons-performance"></span> Token Optimization</h2>
+                <p class="description">Reduce Claude API token consumption by loading only relevant context per query.
+                    When enabled, the system prompt is minimized and context is assembled dynamically based on query intent.</p>
+
+                <?php if ($enabled): ?>
+                <div class="notice notice-info inline" style="margin: 15px 0;">
+                    <p><strong>Token optimization is active.</strong> The system prompt is using condensed guardrails instead of the full knowledge base.
+                        Context is assembled per-query based on detected intent.</p>
+                </div>
+                <?php endif; ?>
+
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="token_optimization_enabled"><?php esc_html_e('Enable Token Optimization', 'gd-chatbot'); ?></label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" id="token_optimization_enabled"
+                                       name="<?php echo esc_attr(self::OPTION_PREFIX . 'token_optimization_enabled'); ?>"
+                                       value="1" <?php checked($enabled, true); ?>>
+                                <?php esc_html_e('Enable intent-driven, budget-constrained context management', 'gd-chatbot'); ?>
+                            </label>
+                            <p class="description">
+                                <?php esc_html_e('When enabled, only relevant context is loaded per query instead of the full knowledge base. Test thoroughly before enabling in production.', 'gd-chatbot'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="token_budget"><?php esc_html_e('Token Budget (per query)', 'gd-chatbot'); ?></label>
+                        </th>
+                        <td>
+                            <input type="number" id="token_budget"
+                                   name="<?php echo esc_attr(self::OPTION_PREFIX . 'token_budget'); ?>"
+                                   value="<?php echo esc_attr($budget); ?>"
+                                   min="200" max="2000" step="50" class="small-text">
+                            <span class="description"><?php esc_html_e('tokens', 'gd-chatbot'); ?></span>
+                            <p class="description">
+                                <?php esc_html_e('Maximum tokens allocated for per-query context (200-2000). Default: 500. Lower values save more on API costs but may reduce context quality.', 'gd-chatbot'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="token_cache_ttl"><?php esc_html_e('Cache TTL', 'gd-chatbot'); ?></label>
+                        </th>
+                        <td>
+                            <input type="number" id="token_cache_ttl"
+                                   name="<?php echo esc_attr(self::OPTION_PREFIX . 'token_cache_ttl'); ?>"
+                                   value="<?php echo esc_attr($cache_ttl); ?>"
+                                   min="60" max="86400" step="60" class="small-text">
+                            <span class="description"><?php esc_html_e('seconds', 'gd-chatbot'); ?></span>
+                            <p class="description">
+                                <?php esc_html_e('How long to cache context fragments (60-86400 seconds). Default: 3600 (1 hour). Static content like band info is cached for 24 hours regardless.', 'gd-chatbot'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Context Cache', 'gd-chatbot'); ?></th>
+                        <td>
+                            <button type="button" class="button" id="gd-clear-context-cache">
+                                <span class="dashicons dashicons-trash" style="vertical-align: middle;"></span>
+                                <?php esc_html_e('Clear Context Cache', 'gd-chatbot'); ?>
+                            </button>
+                            <span id="gd-cache-clear-status" style="margin-left: 10px;"></span>
+                            <p class="description">
+                                <?php esc_html_e('Clears all cached context fragments. Use after updating context files or if responses seem stale.', 'gd-chatbot'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="iti-settings-section">
+                <h2><span class="dashicons dashicons-info"></span> How It Works</h2>
+                <table class="widefat" style="max-width: 700px;">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e('Feature', 'gd-chatbot'); ?></th>
+                            <th><?php esc_html_e('Without Optimization', 'gd-chatbot'); ?></th>
+                            <th><?php esc_html_e('With Optimization', 'gd-chatbot'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong><?php esc_html_e('System Prompt', 'gd-chatbot'); ?></strong></td>
+                            <td><?php esc_html_e('Full knowledge base (~50K tokens)', 'gd-chatbot'); ?></td>
+                            <td><?php esc_html_e('Condensed guardrails (~1.5K tokens)', 'gd-chatbot'); ?></td>
+                        </tr>
+                        <tr>
+                            <td><strong><?php esc_html_e('Per-Query Context', 'gd-chatbot'); ?></strong></td>
+                            <td><?php esc_html_e('All sources, no budget', 'gd-chatbot'); ?></td>
+                            <td><?php esc_html_e('Intent-driven, budget-constrained', 'gd-chatbot'); ?></td>
+                        </tr>
+                        <tr>
+                            <td><strong><?php esc_html_e('Context Caching', 'gd-chatbot'); ?></strong></td>
+                            <td><?php esc_html_e('None', 'gd-chatbot'); ?></td>
+                            <td><?php esc_html_e('WordPress Transients (configurable TTL)', 'gd-chatbot'); ?></td>
+                        </tr>
+                        <tr>
+                            <td><strong><?php esc_html_e('Conversation History', 'gd-chatbot'); ?></strong></td>
+                            <td><?php esc_html_e('Full history, unbounded', 'gd-chatbot'); ?></td>
+                            <td><?php esc_html_e('Last 3 exchanges, 200-token budget', 'gd-chatbot'); ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 20px;"><?php esc_html_e('Emergency Rollback', 'gd-chatbot'); ?></h3>
+                <p class="description">
+                    <?php esc_html_e('To force-disable optimization regardless of this setting, add this to wp-config.php:', 'gd-chatbot'); ?>
+                </p>
+                <code>define('GD_CHATBOT_DISABLE_OPTIMIZATION', true);</code>
+            </div>
+
+            <?php submit_button(); ?>
+        </form>
+
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $('#gd-clear-context-cache').on('click', function() {
+                var $btn = $(this);
+                var $status = $('#gd-cache-clear-status');
+
+                $btn.prop('disabled', true);
+                $status.text('<?php esc_html_e('Clearing...', 'gd-chatbot'); ?>');
+
+                $.post(ajaxurl, {
+                    action: 'gd_chatbot_clear_context_cache',
+                    nonce: '<?php echo wp_create_nonce('gd_chatbot_admin_nonce'); ?>'
+                }, function(response) {
+                    if (response.success) {
+                        $status.text(response.data.message).css('color', 'green');
+                    } else {
+                        $status.text(response.data.message || '<?php esc_html_e('Error clearing cache.', 'gd-chatbot'); ?>').css('color', 'red');
+                    }
+                    $btn.prop('disabled', false);
+                }).fail(function() {
+                    $status.text('<?php esc_html_e('Request failed.', 'gd-chatbot'); ?>').css('color', 'red');
+                    $btn.prop('disabled', false);
+                });
+            });
+        });
+        </script>
+        <?php
+    }
+
     /**
      * Render Shortcode information tab
      */

@@ -27,7 +27,7 @@ class GD_Setlist_Search {
      * Constructor
      */
     public function __construct() {
-        $this->setlist_dir = GD_CHATBOT_PLUGIN_DIR . 'context/Deadshows/deadshows/';
+        $this->setlist_dir = GD_CHATBOT_PLUGIN_DIR . 'context/setlists/';
         
         // Years 1965-1995
         for ($year = 1965; $year <= 1995; $year++) {
@@ -498,6 +498,24 @@ class GD_Setlist_Search {
         return $output;
     }
     
+    /**
+     * Get compact setlist results for token-efficient context.
+     * Calls the existing search() method and truncates the output.
+     *
+     * @param string $query Search query
+     * @param int $max_tokens Maximum tokens for the result (default: 200)
+     * @return string Compact setlist data or empty string
+     */
+    public function search_compact($query, $max_tokens = 200) {
+        $full_results = $this->search($query);
+
+        if (empty($full_results)) {
+            return '';
+        }
+
+        return GD_Token_Estimator::truncate($full_results, $max_tokens);
+    }
+
     /**
      * Check if query is likely about setlists
      */

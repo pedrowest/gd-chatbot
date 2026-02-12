@@ -65,6 +65,17 @@ class GD_Chat_Handler {
      * @return void
      */
     public function process_message_stream($message, $conversation_history = array(), $session_id = '', $callback = null) {
+        // Check for token optimization
+        $optimization_enabled = get_option('gd_chatbot_v2_token_optimization_enabled', false);
+        if (defined('GD_CHATBOT_DISABLE_OPTIMIZATION') && GD_CHATBOT_DISABLE_OPTIMIZATION) {
+            $optimization_enabled = false;
+        }
+
+        if ($optimization_enabled) {
+            $this->process_message_stream_optimized($message, $conversation_history, $session_id, $callback);
+            return;
+        }
+
         $context_parts = array();
         $sources = array();
         $full_response = '';
@@ -163,6 +174,16 @@ class GD_Chat_Handler {
      * @return array|WP_Error Response data or error
      */
     public function process_message($message, $conversation_history = array(), $session_id = '') {
+        // Check for token optimization
+        $optimization_enabled = get_option('gd_chatbot_v2_token_optimization_enabled', false);
+        if (defined('GD_CHATBOT_DISABLE_OPTIMIZATION') && GD_CHATBOT_DISABLE_OPTIMIZATION) {
+            $optimization_enabled = false;
+        }
+
+        if ($optimization_enabled) {
+            return $this->process_message_optimized($message, $conversation_history, $session_id);
+        }
+
         $context_parts = array();
         $sources = array();
         
@@ -259,6 +280,257 @@ class GD_Chat_Handler {
         );
     }
     
+    /**
+     * Process streaming message with token optimization.
+     *
+     * @param string $message User's message
+     * @param array $conversation_history Previous messages
+     * @param string $session_id Session identifier
+     * @param callable $callback Function to call for each chunk
+     */
+    private function process_message_stream_optimized($message, $conversation_history, $session_id, $callback) {
+        $context_builder = new GD_Context_Builder();
+        $sources = array();
+        $full_response = '';
+
+        // Gather raw results for context builder
+        $options = array();
+
+        // Setlist search
+        if ($this->setlist_search->is_setlist_query($message)) {
+            $setlist_data = $this->setlist_search->search_compact($message);
+
+            if (!empty($setlist_data)) {
+                $options['setlist_results'] = $setlist_data;
+                $sources['setlist_database'] = array(
+                    array(
+                        'title' => 'Grateful Dead Setlist Database (1965-1995)',
+                        'url' => '',
+                        'score' => 100
+                    )
+                );
+            }
+        }
+
+        // Pinecone KB
+        if ($this->pinecone->is_enabled()) {
+            $pinecone_results = $this->pinecone->query($message);
+
+            if (!is_wp_error($pinecone_results) && !empty($pinecone_results['matches'])) {
+                $options['pinecone_results'] = $pinecone_results;
+                $sources['knowledge_base'] = $this->extract_kb_sources($pinecone_results);
+            }
+        }
+
+        // Tavily web search
+        if ($this->tavily->is_enabled()) {
+            $tavily_results = $this->tavily->search($message);
+
+            if (!is_wp_error($tavily_results) && !empty($tavily_results['results'])) {
+                $options['tavily_results'] = $tavily_results;
+                $sources['web_search'] = $this->extract_web_sources($tavily_results);
+            }
+        }
+
+        // Build optimized context
+        $context_data = $context_builder->build_context($message, $options);
+
+        // Log debug info
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf(
+                'GD Chatbot [%s]: Intent=%s, Tokens=%d, Sources=%s',
+                $session_id,
+                $context_data['intent'],
+                $context_data['debug_info']['used_tokens'],
+                implode(',', $context_data['sources_used'])
+            ));
+        }
+
+        // Prepare optimized conversation history
+        $optimized_history = $this->prepare_conversation_history($conversation_history);
+
+        // Send sources first if available
+        if (!empty($sources) && $callback) {
+            call_user_func($callback, array(
+                'type' => 'sources',
+                'sources' => $sources
+            ));
+        }
+
+        // Stream to Claude
+        $stream_callback = function ($data) use ($callback, &$full_response) {
+            if ($data['type'] === 'content') {
+                $full_response = $data['full_text'];
+            }
+
+            if ($callback) {
+                call_user_func($callback, $data);
+            }
+        };
+
+        $result = $this->claude->send_message_stream($message, $optimized_history, $context_data['context'], $stream_callback);
+
+        if (is_wp_error($result)) {
+            if ($callback) {
+                call_user_func($callback, array(
+                    'type' => 'error',
+                    'error' => $result->get_error_message()
+                ));
+            }
+            return;
+        }
+
+        // Log conversation
+        if (!empty($full_response)) {
+            $this->log_conversation($session_id, $message, $full_response, $sources);
+        }
+    }
+
+    /**
+     * Process non-streaming message with token optimization.
+     *
+     * @param string $message User's message
+     * @param array $conversation_history Previous messages
+     * @param string $session_id Session identifier
+     * @return array|WP_Error Response data or error
+     */
+    private function process_message_optimized($message, $conversation_history, $session_id) {
+        $context_builder = new GD_Context_Builder();
+        $sources = array();
+
+        // Gather raw results for context builder
+        $options = array();
+
+        // Setlist search
+        if ($this->setlist_search->is_setlist_query($message)) {
+            $setlist_data = $this->setlist_search->search_compact($message);
+
+            if (!empty($setlist_data)) {
+                $options['setlist_results'] = $setlist_data;
+                $sources['setlist_database'] = array(
+                    array(
+                        'title' => 'Grateful Dead Setlist Database (1965-1995)',
+                        'url' => '',
+                        'score' => 100
+                    )
+                );
+            }
+        }
+
+        // KB Integration (non-streaming path)
+        if ($this->kb_integration->is_available() && $this->kb_integration->should_use_kb($message)) {
+            $kb_results = $this->kb_integration->search($message);
+
+            if (!is_wp_error($kb_results) && !empty($kb_results['matches'])) {
+                $options['kb_results'] = $kb_results;
+                $sources['knowledgebase_loader'] = $this->kb_integration->extract_sources($kb_results);
+            }
+        }
+
+        // AI Power Integration (non-streaming path)
+        if ($this->aipower_integration->is_available() && $this->aipower_integration->should_use($message)) {
+            $aipower_results = $this->aipower_integration->search($message);
+
+            if (!is_wp_error($aipower_results) && !empty($aipower_results['matches'])) {
+                $options['aipower_results'] = $aipower_results;
+                $sources['aipower_content'] = $this->aipower_integration->extract_sources($aipower_results);
+            }
+        }
+
+        // Pinecone KB
+        if ($this->pinecone->is_enabled()) {
+            $pinecone_results = $this->pinecone->query($message);
+
+            if (!is_wp_error($pinecone_results) && !empty($pinecone_results['matches'])) {
+                $options['pinecone_results'] = $pinecone_results;
+                $sources['knowledge_base'] = $this->extract_kb_sources($pinecone_results);
+            }
+        }
+
+        // Tavily web search
+        if ($this->tavily->is_enabled()) {
+            $tavily_results = $this->tavily->search($message);
+
+            if (!is_wp_error($tavily_results) && !empty($tavily_results['results'])) {
+                $options['tavily_results'] = $tavily_results;
+                $sources['web_search'] = $this->extract_web_sources($tavily_results);
+            }
+        }
+
+        // Build optimized context
+        $context_data = $context_builder->build_context($message, $options);
+
+        // Log debug info
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf(
+                'GD Chatbot [%s]: Intent=%s, Tokens=%d, Sources=%s',
+                $session_id,
+                $context_data['intent'],
+                $context_data['debug_info']['used_tokens'],
+                implode(',', $context_data['sources_used'])
+            ));
+        }
+
+        // Prepare optimized conversation history
+        $optimized_history = $this->prepare_conversation_history($conversation_history);
+
+        // Send to Claude
+        $response = $this->claude->send_message($message, $optimized_history, $context_data['context']);
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        // Log conversation
+        $this->log_conversation($session_id, $message, $response['message'], $sources);
+
+        return array(
+            'message' => $response['message'],
+            'sources' => $sources,
+            'usage' => $response['usage'],
+            'model' => $response['model']
+        );
+    }
+
+    /**
+     * Prepare conversation history with token budget enforcement.
+     * Limits to last 3 exchanges within a 200-token budget.
+     *
+     * @param array $history Full conversation history
+     * @param int $token_budget Maximum tokens for history (default: 200)
+     * @return array Truncated conversation history
+     */
+    private function prepare_conversation_history($history, $token_budget = 200) {
+        if (empty($history)) {
+            return array();
+        }
+
+        // Keep last 3 exchanges (6 messages: 3 user + 3 assistant)
+        $recent = array_slice($history, -6);
+        $truncated = array();
+        $tokens = 0;
+
+        foreach ($recent as $message) {
+            $content = isset($message['content']) ? $message['content'] : '';
+            $msg_tokens = GD_Token_Estimator::estimate($content);
+
+            if ($tokens + $msg_tokens <= $token_budget) {
+                $truncated[] = $message;
+                $tokens += $msg_tokens;
+            } else {
+                // Truncate this message to fit remaining budget
+                $remaining = $token_budget - $tokens;
+                if ($remaining > 20) {
+                    $message['content'] = GD_Token_Estimator::truncate($content, $remaining);
+                    $truncated[] = $message;
+                }
+                break;
+            }
+        }
+
+        return $truncated;
+    }
+
     /**
      * Extract source information from Pinecone results
      */
